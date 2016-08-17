@@ -114,7 +114,11 @@ Component* Component::NewComponentOfType(const std::string &component_type) {
   } else if (component_type == "FixedBiasComponent") {
     ans = new FixedBiasComponent();
   } else if (component_type == "NoOpComponent") {
-    ans = new NoOpComponent();
+    ans = new NoOpComponent();    
+  } else if (component_type == "OppositeComponent") {
+    ans = new OppositeComponent();
+  } else if (component_type == "LeakyComponent") {
+    ans = new LeakyComponent();    
   } else if (component_type == "ClipGradientComponent") {
     ans = new ClipGradientComponent();
   } else if (component_type == "ElementwiseProductComponent") {
