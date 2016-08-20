@@ -977,6 +977,30 @@ class LeakyComponent: public NonlinearComponent {
   LeakyComponent &operator = (const LeakyComponent &other); // Disallow.
 };
 
+// PlusOneComponent: output = 1 + input. 
+class PlusOneComponent: public NonlinearComponent {
+ public:
+  explicit PlusOneComponent(const PlusOneComponent &other): NonlinearComponent(other) { }
+  PlusOneComponent() { }
+  virtual std::string Type() const { return "PlusOneComponent"; }
+  virtual int32 Properties() const {
+    return kSimpleComponent|kLinearInInput|kPropagateInPlace;
+  }
+  virtual Component* Copy() const { return new PlusOneComponent(*this); }
+  virtual void Propagate(const ComponentPrecomputedIndexes *indexes,
+                         const CuMatrixBase<BaseFloat> &in,
+                         CuMatrixBase<BaseFloat> *out) const;
+  virtual void Backprop(const std::string &debug_info,
+                        const ComponentPrecomputedIndexes *indexes,
+                        const CuMatrixBase<BaseFloat> &, //in_value
+                        const CuMatrixBase<BaseFloat> &, // out_value,
+                        const CuMatrixBase<BaseFloat> &out_deriv,
+                        Component *to_update,
+                        CuMatrixBase<BaseFloat> *in_deriv) const;
+ private:
+  PlusOneComponent &operator = (const PlusOneComponent &other); // Disallow.
+};
+
 // ClipGradientComponent just duplicates its input, but clips gradients
 // during backpropagation if they cross a predetermined threshold.
 // This component will be used to prevent gradient explosion problem in
