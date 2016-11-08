@@ -122,7 +122,9 @@ Component* Component::NewComponentOfType(const std::string &component_type) {
   } else if (component_type == "LeakyComponent") {
     ans = new LeakyComponent();
   } else if (component_type == "PlusOneComponent") {
-    ans = new PlusOneComponent();    
+    ans = new PlusOneComponent();
+  } else if (component_type == "NoBpComponent") {
+    ans = new NoBpComponent();    
   } else if (component_type == "ClipGradientComponent") {
     ans = new ClipGradientComponent();
   } else if (component_type == "ElementwiseProductComponent") {

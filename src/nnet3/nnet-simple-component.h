@@ -1019,6 +1019,32 @@ class NoOpComponent: public NonlinearComponent {
   NoOpComponent &operator = (const NoOpComponent &other); // Disallow.
 };
 
+
+// NoPpComponent just duplicates its input. Return 0 during BP.
+class NoBpComponent: public NonlinearComponent {
+ public:
+  explicit NoBpComponent(const NoBpComponent &other): NonlinearComponent(other) { }
+  NoBpComponent() { }
+  virtual std::string Type() const { return "NoBpComponent"; }
+  virtual int32 Properties() const {
+    return kSimpleComponent|kLinearInInput|kPropagateInPlace;
+  }
+  virtual Component* Copy() const { return new NoBpComponent(*this); }
+  virtual void Propagate(const ComponentPrecomputedIndexes *indexes,
+                         const CuMatrixBase<BaseFloat> &in,
+                         CuMatrixBase<BaseFloat> *out) const;
+  virtual void Backprop(const std::string &debug_info,
+                        const ComponentPrecomputedIndexes *indexes,
+                        const CuMatrixBase<BaseFloat> &, //in_value
+                        const CuMatrixBase<BaseFloat> &, // out_value,
+                        const CuMatrixBase<BaseFloat> &out_deriv,
+                        Component *to_update,
+                        CuMatrixBase<BaseFloat> *in_deriv) const;
+ private:
+  NoBpComponent &operator = (const NoBpComponent &other); // Disallow.
+};
+
+
 // OppositeComponent gets the opposite of its input. 
 class OppositeComponent: public NonlinearComponent {
  public:
