@@ -567,6 +567,29 @@ void NoBpComponent::Backprop(const std::string &debug_info,
 }
 
 
+void ProbToOnehotComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
+                                 const CuMatrixBase<BaseFloat> &in,
+                                 CuMatrixBase<BaseFloat> *out) const {
+  CuMatrix<BaseFloat> temp;
+  temp.Resize(in.NumRows(), in.NumCols());
+  temp.CopyFromMat(in);
+  temp.Add(-0.5);
+  out->Heaviside(temp);
+}
+
+void ProbToOnehotComponent::Backprop(const std::string &debug_info,
+                             const ComponentPrecomputedIndexes *indexes,
+                             const CuMatrixBase<BaseFloat> &,
+                             const CuMatrixBase<BaseFloat> &,
+                             const CuMatrixBase<BaseFloat> &out_deriv,
+                             Component *to_update, // may be NULL; may be identical
+                             // to "this" or different.
+                             CuMatrixBase<BaseFloat> *in_deriv) const {
+  in_deriv->CopyFromMat(out_deriv);
+  in_deriv->Scale(0.0);
+}
+
+
 void OppositeComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
                                  const CuMatrixBase<BaseFloat> &in,
                                  CuMatrixBase<BaseFloat> *out) const {

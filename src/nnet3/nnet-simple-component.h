@@ -1045,6 +1045,31 @@ class NoBpComponent: public NonlinearComponent {
 };
 
 
+// ProbToOnehotComponent converts Probs to 0(if<0.5) or 1 if(>0.5).
+class ProbToOnehotComponent: public NonlinearComponent {
+ public:
+  explicit ProbToOnehotComponent(const ProbToOnehotComponent &other): NonlinearComponent(other) { }
+  ProbToOnehotComponent() { }
+  virtual std::string Type() const { return "ProbToOnehotComponent"; }
+  virtual int32 Properties() const {
+    return kSimpleComponent|kLinearInInput|kPropagateInPlace;
+  }
+  virtual Component* Copy() const { return new ProbToOnehotComponent(*this); }
+  virtual void Propagate(const ComponentPrecomputedIndexes *indexes,
+                         const CuMatrixBase<BaseFloat> &in,
+                         CuMatrixBase<BaseFloat> *out) const;
+  virtual void Backprop(const std::string &debug_info,
+                        const ComponentPrecomputedIndexes *indexes,
+                        const CuMatrixBase<BaseFloat> &, //in_value
+                        const CuMatrixBase<BaseFloat> &, // out_value,
+                        const CuMatrixBase<BaseFloat> &out_deriv,
+                        Component *to_update,
+                        CuMatrixBase<BaseFloat> *in_deriv) const;
+ private:
+  ProbToOnehotComponent &operator = (const ProbToOnehotComponent &other); // Disallow.
+};
+
+
 // OppositeComponent gets the opposite of its input. 
 class OppositeComponent: public NonlinearComponent {
  public:
