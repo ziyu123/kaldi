@@ -3490,6 +3490,7 @@ void LogComponent::Propagate(const ComponentPrecomputedIndexes *indexes,
   // Applies log softmax function to each row of the output. For each row, we do
   // x_i = x_i - log(sum_j exp(x_j))
   out->CopyFromMat(in);
+  out->ApplyFloor(1e-40); //avoid -inf in computing
   out->ApplyLog();
 }
 
