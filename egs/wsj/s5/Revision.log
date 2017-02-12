@@ -1,0 +1,17 @@
+
+joint training revision:
+
+1. source code: 
+   nnet3-get-egs-double-targets
+   nnet-utils
+   nnet3-copy
+
+2. scripts: 
+   spk_ali.py, spk_num.py, get_egs_spk_pure.sh, train_spk_pure.sh
+   get_egs_speech_spk.sh, train_speech_spk.sh
+   run_lstm_joint.sh
+   
+3. configs
+
+
+
