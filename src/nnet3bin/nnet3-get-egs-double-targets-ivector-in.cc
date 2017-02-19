@@ -1,4 +1,4 @@
-// nnet3bin/nnet3-get-egs-double-targets.cc
+// nnet3bin/nnet3-get-egs-double-targets-ivector-in.cc
 
 // Copyright 2012-2015  Johns Hopkins University (author:  Daniel Povey)
 //                2014  Vimal Manohar
@@ -79,15 +79,19 @@ static void ProcessFile(const MatrixBase<BaseFloat> &feats,
 
     // if applicable, add the iVector feature.
     if (ivector_feats != NULL) {
-      // try to get closest frame to middle of window to get
-      // a representative iVector.
-      int32 closest_frame = t + (actual_frames_per_eg / 2);
-      KALDI_ASSERT(ivector_feats->NumRows() > 0);
-      if (closest_frame >= ivector_feats->NumRows())
-        closest_frame = ivector_feats->NumRows() - 1;
-      Matrix<BaseFloat> ivector(1, ivector_feats->NumCols());
-      ivector.Row(0).CopyFromVec(ivector_feats->Row(closest_frame));
-      eg.io.push_back(NnetIo("ivector", 0, ivector));
+        Matrix<BaseFloat> ivector_frames(tot_frames, ivector_feats->NumCols(), kUndefined);
+        // Set up "ivector_frames".
+        for (int32 j2 = -left_context; j2 < frames_per_eg + right_context; j2++) {
+          int32 t3 = j2 + t;
+          if (t3 < 0) t3 = 0;
+          if (t3>= ivector_feats->NumRows()) t3= ivector_feats->NumRows() - 1;
+          SubVector<BaseFloat> src2(ivector_feats, t3),
+              dest2(ivector_frames, j2 + left_context);
+          dest2.CopyFromVec(src2);
+        }
+        
+        eg.io.push_back(NnetIo("ivector", - left_context,
+                               ivector_frames));
     }
 
     // add the labels.
