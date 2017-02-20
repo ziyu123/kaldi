@@ -82,7 +82,7 @@ static void ProcessFile(const MatrixBase<BaseFloat> &feats,
           int32 t3 = j2 + t;
           if (t3 < 0) t3 = 0;
           if (t3>= ivector_feats->NumRows()) t3= ivector_feats->NumRows() - 1;
-          SubVector<BaseFloat> src2(ivector_feats, t3),
+          SubVector<BaseFloat> src2(*ivector_feats, t3),
               dest2(ivector_frames, j2 + left_context);
           dest2.CopyFromVec(src2);
         }
