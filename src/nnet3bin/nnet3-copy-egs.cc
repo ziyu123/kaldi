@@ -127,6 +127,7 @@ void FilterExample(const NnetExample &eg,
       min_t = min_input_t;
       max_t = max_input_t;
       is_input_or_output = true;
+    } else if (name == "output" || name == "output2") {
       min_t = min_output_t;
       max_t = max_output_t;
       is_input_or_output = true;
