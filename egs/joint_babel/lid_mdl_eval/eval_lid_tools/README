@@ -1,0 +1,70 @@
+INTRODUCTION
+============
+
+This package is used to support the AP16-OLE challenge.
+
+Here we provide two scripts for calculating Cavg*100 and IDR, respectively.
+
+Besides, with the help of DETware which you can download from the NIST homepage, 
+EER, minDCF and DET curves are also obtained. 
+
+Download link of DETware : https://www.nist.gov/sites/default/files/documents/itl/iad/mig/DETware_v2-1-tar.gz
+More details please visit: https://www.nist.gov/itl/iad/mig/tools
+
+DESCRIPTION
+============
+
+1. Prepare the score file (refers to 'demo.score')
+
+The score file should be in the following format:
+		
+	          ct-cn   id-id   ja-jf   ko-kr   ru-ru   vi-vn   zh-cn
+	utt-id-1  score-1 score-2 score-3 score-4 score-5 score-6 score-7
+	utt-id-2  score-1 score-2 score-3 score-4 score-5 score-6 score-7
+        ...
+
+utt-id-x: the identity of test utterance
+score-x : the score of the test utterance belonging to language x
+
+Refer to the following paper for more details about the evaluation plan:
+
+Dong Wang, Lantian Li, Difei Tang, and Qing Chen, "AP16-OL7: A Multilingual 
+Database for Oriental Languages and A Language Recognition Baseline", APSIPA 2016.
+
+
+2. Cavg
+
+Compute_Cavg.py: read a score file and the key file (label.scp) to 
+compute Cavg and the minimum Cavg. Python 2.x is required.
+
+Example: Compute_Cavg.py demo.score label.scp
+
+
+3. IDR
+
+Compute_IDR.py: read a score file and the key file (label.scp) to 
+compute identification rate (IDR). Python 2.x is required.
+
+Example: Compute_IDR.py demo.score label.scp
+
+
+4. EER, minDCF and DET curves
+
+(1). Prepare_Det.py: read a score file and the key file (label.scp) to 
+generate true_speaker_scores(default by target.txt) and impostor_scores(default by nontarget.txt). 
+Python 2.x is required.
+
+(2). run Eval_Spkr_Det.m in ./DET to obtain EER, minDCF and DET curves.
+
+Example: Prepare_Det.py demo.score label.scp
+         cd DET
+         matlab Eval_Spkr_Det.m 
+
+
+
+Contact person
+==============
+
+Lantian Li@Tsinghua University
+lilt@cslt.riit.tsinghua.edu.cn
+

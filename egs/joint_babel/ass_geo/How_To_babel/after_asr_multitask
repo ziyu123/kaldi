@@ -1,0 +1,11 @@
+
+1. cp basic files, keep only one output
+
+2. nnet3-copy --edits=remove-orphans
+
+3. nnet3-am-copy --set-raw-nnet=XXX ../NNET/final.mdl combined.mdl
+
+4. set common_egs_dir
+
+5. run from iter_num+1, to get post.*, then decode
+

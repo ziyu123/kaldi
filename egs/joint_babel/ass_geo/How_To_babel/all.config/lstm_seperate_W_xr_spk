@@ -1,0 +1,86 @@
+input-node name=input dim=23
+component name=L0_fixaffine type=FixedAffineComponent matrix=exp/nnet3/lstm/configs/lda.mat
+# Input gate control : W_i* matrices
+#component name=spk_Lstm1_W_i-xr type=NaturalGradientAffineComponent input-dim=371 output-dim=1024  max-change=0.75
+component name=spk_Lstm1_W_i-x type=NaturalGradientAffineComponent input-dim=115 output-dim=1024  max-change=0.75
+component name=spk_Lstm1_W_i-r type=NaturalGradientAffineComponent input-dim=256 output-dim=1024  max-change=0.75
+# note : the cell outputs pass through a diagonal matrix
+component name=spk_Lstm1_w_ic type=NaturalGradientPerElementScaleComponent  dim=1024  param-mean=0.0 param-stddev=1.0  max-change=0.75
+# Forget gate control : W_f* matrices
+#component name=spk_Lstm1_W_f-xr type=NaturalGradientAffineComponent input-dim=371 output-dim=1024  max-change=0.75
+component name=spk_Lstm1_W_f-x type=NaturalGradientAffineComponent input-dim=115 output-dim=1024  max-change=0.75
+component name=spk_Lstm1_W_f-r type=NaturalGradientAffineComponent input-dim=256 output-dim=1024  max-change=0.75
+# note : the cell outputs pass through a diagonal matrix
+component name=spk_Lstm1_w_fc type=NaturalGradientPerElementScaleComponent  dim=1024  param-mean=0.0 param-stddev=1.0  max-change=0.75
+#  Output gate control : W_o* matrices
+#component name=spk_Lstm1_W_o-xr type=NaturalGradientAffineComponent input-dim=371 output-dim=1024  max-change=0.75
+component name=spk_Lstm1_W_o-x type=NaturalGradientAffineComponent input-dim=115 output-dim=1024  max-change=0.75
+component name=spk_Lstm1_W_o-r type=NaturalGradientAffineComponent input-dim=256 output-dim=1024  max-change=0.75
+# note : the cell outputs pass through a diagonal matrix
+component name=spk_Lstm1_w_oc type=NaturalGradientPerElementScaleComponent  dim=1024  param-mean=0.0 param-stddev=1.0  max-change=0.75
+# Cell input matrices : W_c* matrices
+#component name=spk_Lstm1_W_c-xr type=NaturalGradientAffineComponent input-dim=371 output-dim=1024  max-change=0.75
+component name=spk_Lstm1_W_c-x type=NaturalGradientAffineComponent input-dim=115 output-dim=1024  max-change=0.75
+component name=spk_Lstm1_W_c-r type=NaturalGradientAffineComponent input-dim=256 output-dim=1024  max-change=0.75
+# Defining the non-linearities
+component name=spk_Lstm1_i type=SigmoidComponent dim=1024 self-repair-scale=0.0000100000
+component name=spk_Lstm1_f type=SigmoidComponent dim=1024 self-repair-scale=0.0000100000
+component name=spk_Lstm1_o type=SigmoidComponent dim=1024 self-repair-scale=0.0000100000
+component name=spk_Lstm1_g type=TanhComponent dim=1024 self-repair-scale=0.0000100000
+component name=spk_Lstm1_h type=TanhComponent dim=1024 self-repair-scale=0.0000100000
+# Defining the cell computations
+component name=spk_Lstm1_c1 type=ElementwiseProductComponent input-dim=2048 output-dim=1024
+component name=spk_Lstm1_c2 type=ElementwiseProductComponent input-dim=2048 output-dim=1024
+component name=spk_Lstm1_m type=ElementwiseProductComponent input-dim=2048 output-dim=1024
+component name=spk_Lstm1_c type=BackpropTruncationComponent dim=1024 clipping-threshold=30.0 zeroing-threshold=15.0 zeroing-interval=20 recurrence-interval=1
+
+
+# projection matrices : Wrm and Wpm
+component name=spk_Lstm1_W-m type=NaturalGradientAffineComponent input-dim=1024 output-dim=512  max-change=0.75
+component name=spk_Lstm1_r type=BackpropTruncationComponent dim=256 clipping-threshold=30.0 zeroing-threshold=15.0 zeroing-interval=20 recurrence-interval=1
+component name=spk_Final_affine type=NaturalGradientAffineComponent input-dim=512 output-dim=3307  max-change=1.50
+component name=spk_Final_log_softmax type=LogSoftmaxComponent dim=3307
+
+#Component nodes
+component-node name=L0_fixaffine component=L0_fixaffine input=Append(Offset(input, -2), Offset(input, -1), input, Offset(input, 1), Offset(input, 2))
+component-node name=spk_Lstm1_c_t component=spk_Lstm1_c input=Sum(spk_Lstm1_c1_t, spk_Lstm1_c2_t)
+# i_t
+#component-node name=spk_Lstm1_i1 component=spk_Lstm1_W_i-xr input=Append(L0_fixaffine, IfDefined(Offset(spk_Lstm1_r_t, -1)))
+component-node name=spk_Lstm1_i1_1 component=spk_Lstm1_W_i-x input=L0_fixaffine
+component-node name=spk_Lstm1_i1_2 component=spk_Lstm1_W_i-r input=IfDefined(Offset(spk_Lstm1_r_t, -1))
+component-node name=spk_Lstm1_i2 component=spk_Lstm1_w_ic  input=IfDefined(Offset(spk_Lstm1_c_t, -1))
+component-node name=spk_Lstm1_i_t component=spk_Lstm1_i input=Sum(Sum(spk_Lstm1_i1_1, spk_Lstm1_i1_2), spk_Lstm1_i2)
+# f_t
+#component-node name=spk_Lstm1_f1 component=spk_Lstm1_W_f-xr input=Append(L0_fixaffine, IfDefined(Offset(spk_Lstm1_r_t, -1)))
+component-node name=spk_Lstm1_f1_1 component=spk_Lstm1_W_f-x input=L0_fixaffine
+component-node name=spk_Lstm1_f1_2 component=spk_Lstm1_W_f-r input=IfDefined(Offset(spk_Lstm1_r_t, -1))
+component-node name=spk_Lstm1_f2 component=spk_Lstm1_w_fc  input=IfDefined(Offset(spk_Lstm1_c_t, -1))
+component-node name=spk_Lstm1_f_t component=spk_Lstm1_f input=Sum(Sum(spk_Lstm1_f1_1, spk_Lstm1_f1_2), spk_Lstm1_f2)
+# o_t
+#component-node name=spk_Lstm1_o1 component=spk_Lstm1_W_o-xr input=Append(L0_fixaffine, IfDefined(Offset(spk_Lstm1_r_t, -1)))
+component-node name=spk_Lstm1_o1_1 component=spk_Lstm1_W_o-x input=L0_fixaffine
+component-node name=spk_Lstm1_o1_2 component=spk_Lstm1_W_o-r input=IfDefined(Offset(spk_Lstm1_r_t, -1))
+component-node name=spk_Lstm1_o2 component=spk_Lstm1_w_oc input=spk_Lstm1_c_t
+component-node name=spk_Lstm1_o_t component=spk_Lstm1_o input=Sum(Sum(spk_Lstm1_o1_1, spk_Lstm1_o1_2), spk_Lstm1_o2)
+# h_t
+component-node name=spk_Lstm1_h_t component=spk_Lstm1_h input=spk_Lstm1_c_t
+# g_t
+#component-node name=spk_Lstm1_g1 component=spk_Lstm1_W_c-xr input=Append(L0_fixaffine, IfDefined(Offset(spk_Lstm1_r_t, -1)))
+component-node name=spk_Lstm1_g1_1 component=spk_Lstm1_W_c-x input=L0_fixaffine
+component-node name=spk_Lstm1_g1_2 component=spk_Lstm1_W_c-r input=IfDefined(Offset(spk_Lstm1_r_t, -1))
+component-node name=spk_Lstm1_g_t component=spk_Lstm1_g input=Sum(spk_Lstm1_g1_1, spk_Lstm1_g1_2)
+# parts of c_t
+component-node name=spk_Lstm1_c1_t component=spk_Lstm1_c1  input=Append(spk_Lstm1_f_t, IfDefined(Offset(spk_Lstm1_c_t, -1)))
+component-node name=spk_Lstm1_c2_t component=spk_Lstm1_c2 input=Append(spk_Lstm1_i_t, spk_Lstm1_g_t)
+# m_t
+component-node name=spk_Lstm1_m_t component=spk_Lstm1_m input=Append(spk_Lstm1_o_t, spk_Lstm1_h_t)
+# r_t and p_t
+component-node name=spk_Lstm1_rp_t component=spk_Lstm1_W-m input=spk_Lstm1_m_t
+dim-range-node name=spk_Lstm1_r_t_preclip input-node=spk_Lstm1_rp_t dim-offset=0 dim=256
+component-node name=spk_Lstm1_r_t component=spk_Lstm1_r input=spk_Lstm1_r_t_preclip
+
+component-node name=spk_Final_affine component=spk_Final_affine input=spk_Lstm1_rp_t
+component-node name=spk_Final_log_softmax component=spk_Final_log_softmax input=spk_Final_affine
+output-node name=output input=Offset(spk_Final_log_softmax,5) objective=linear
+
+

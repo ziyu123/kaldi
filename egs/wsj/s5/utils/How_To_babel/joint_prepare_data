@@ -1,0 +1,31 @@
+---Basic files---
+
+from ass_geo
+
+How_To cmd.sh conf eval_lid* local merge_egs.sh merge_egs_no_shuffle.sh mod_fix.config mod_replace.config mod_replace_lda.config path.sh run-0-gmm-joint2.sh run-0-prepare-lang-merge2.sh run_lstm.sh run_lstm_asr_multitask_egs_no_shuffle.sh run_lstm_asr_multitask.sh run_lstm_joint.sh run_lstm_spk_pure.sh steps utils wer.sh
+
+
+
+
+
+---Merge 2 databases---
+
+1. run-mfcc-energy.sh respectively in single directory, 
+   gets feats.vad, feats.len.
+   spk_ali_id_xxx.py respectively in single directory,
+   gets language alignments (from vad).
+
+or
+
+  speech_ali_to_phone.sh
+  spk_ali_from_asr_id_xxxx.py
+
+or 
+  
+  spk_ali_raw_id_0.py
+
+3. combine data/train, data_fbank/train
+           ln -s lang1/data/test -> data/test1, etc. 
+           exp/spk_ali (ali.ark.id1 ali.ark.id2 ..., should be sorted)
+           run-0-prepare-lang.sh: data/local,data/srilm/lm.gz --> data/lang
+
