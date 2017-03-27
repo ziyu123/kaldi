@@ -58,7 +58,7 @@ bool ContainsSingleExample(const NnetExample &eg,
                                         end = io.indexes.end();
     // Should not have an empty input/output type.
     KALDI_ASSERT(!io.indexes.empty());
-    if (io.name == "input" || io.name == "output" || io.name == "output2") {
+    if (io.name == "input" || io.name == "output" || io.name == "output2" || io.name == "output_plus") {
       int32 min_t = iter->t, max_t = iter->t;
       for (; iter != end; ++iter) {
         int32 this_t = iter->t;
@@ -75,7 +75,7 @@ bool ContainsSingleExample(const NnetExample &eg,
         *min_input_t = min_t;
         *max_input_t = max_t;
       } else {
-        KALDI_ASSERT(io.name == "output" || io.name == "output2");
+        KALDI_ASSERT(io.name == "output" || io.name == "output2" || io.name == "output_plus");
         done_output = true;
         *min_output_t = min_t;
         *max_output_t = max_t;
@@ -127,7 +127,7 @@ void FilterExample(const NnetExample &eg,
       min_t = min_input_t;
       max_t = max_input_t;
       is_input_or_output = true;
-    } else if (name == "output" || name == "output2") {
+    } else if (name == "output" || name == "output2" || name == "output_plus") {
       min_t = min_output_t;
       max_t = max_output_t;
       is_input_or_output = true;
