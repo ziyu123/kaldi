@@ -5,6 +5,9 @@ CC = gcc         # used for sph2pipe
 # CXX = clang++  # Uncomment these lines
 # CC = clang     # to build with Clang.
 
+# Complie openfst with -fPIC for further dynamic link
+CXXFLAGS += -fPIC
+
 # Note: OpenFst requires a relatively recent C++ compiler with C++11 support,
 # e.g. g++ >= 4.7, Apple clang >= 5.0 or LLVM clang >= 3.3.
 OPENFST_VERSION = 1.6.2
@@ -61,6 +64,7 @@ openfst_compiled: openfst-$(OPENFST_VERSION)/Makefile
 
 openfst-$(OPENFST_VERSION)/lib: | openfst-$(OPENFST_VERSION)/Makefile
 	-cd openfst-$(OPENFST_VERSION) && [ -d lib64 ] && [ ! -d lib ] && ln -s lib64 lib
+
 
 # Add the -O flag to CXXFLAGS on cygwin as it can fix the compilation error
 # "file too big".
