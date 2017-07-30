@@ -79,6 +79,158 @@ void MfccComputer::Compute(BaseFloat signal_log_energy,
   }
 }
 
+void MfccComputer::Compute(BaseFloat signal_log_energy,
+                           BaseFloat vtln_warp,
+                           VectorBase<BaseFloat> *signal_frame,
+                           VectorBase<BaseFloat> *feature
+                           char *peak_out) {
+  KALDI_ASSERT(signal_frame->Dim() == opts_.frame_opts.PaddedWindowSize() &&
+               feature->Dim() == this->Dim());
+
+  const MelBanks &mel_banks = *(GetMelBanks(vtln_warp));
+
+  if (opts_.use_energy && !opts_.raw_energy)
+    signal_log_energy = Log(std::max(VecVec(*signal_frame, *signal_frame),
+                                     std::numeric_limits<BaseFloat>::min()));
+
+  if (srfft_ != NULL)  // Compute FFT using the split-radix algorithm.
+    srfft_->Compute(signal_frame->Data(), true);
+  else  // An alternative algorithm that works for non-powers-of-two.
+    RealFft(signal_frame, true);
+
+  // Convert the FFT into a power spectrum.
+  ComputePowerSpectrum(signal_frame);
+  SubVector<BaseFloat> power_spectrum(*signal_frame, 0,
+                                      signal_frame->Dim() / 2 + 1);
+
+  mel_banks.Compute(power_spectrum, &mel_energies_);
+
+
+#define GZF
+#ifdef GZF
+  //处理求取共振峰
+      {
+          int i=0;
+          Vector<BaseFloat> window_temp = *signal_frame;
+          float har[window_temp.Dim()/2 + 1];
+          float av_5[window_temp.Dim()/2 + 1];
+  
+          float peak_10[20];
+  
+          memset(peak_10,0x00,sizeof(peak_10));
+          memset(har,0x00,sizeof(har));
+          memset(av_5,0x00,sizeof(av_5));
+          for(i=0;i<window_temp.Dim()/2 + 1;i++)
+          {
+              har[i]=power_spectrum.Data()[i];
+          }
+          int j=0,k=0;
+          for(i=0;i+5<window_temp.Dim()/2 + 1;i++)
+          {
+              for(j=i;j<i+5;j++)
+              {
+                  av_5[i] += har[j];
+              }
+              av_5[i] /=5;
+              //printf("%f ",log(sqrtf(av_5[i])));
+  //          printf("%f ",log(sqrtf(har[i])));
+          }
+  //      printf("\n");
+      /*
+#define START_F 0
+#define P_N 4
+          for(i=START_F;i+P_N*2<window.Dim()/2 ;++i)
+          {
+              if(av_5[i] > av_5[i-1] && av_5[i] > av_5[i+1])
+              {
+                  for(j=2;j<P_N;j++)
+                  {
+                      if((i >= j && av_5[i] < av_5[i-j]) || av_5[i] < av_5[i+j])
+                      {
+                          break;
+                      }
+                  }
+                  if(j == P_N)
+                  {
+                      peak_4[k]=av_5[i];
+                      peak_4[k+1]=i;
+                      k += 2;
+                      i += P_N;
+                  }
+                  if(k>=8)
+                      break;
+              }
+          }
+          */
+  
+          for(i=1;i+1<window_temp.Dim()/2;++i)
+          {
+              if(har[i]>har[i-1] && har[i]>har[i+1])
+              {
+                  for(j=2;j<3;++j)
+                  {
+                      //only need to i local minimum
+                      if((i>=j&& har[i]<har[i-j]) ||(i+j<window_temp.Dim()/2 && har[i]<har[i+j]))
+                          break;
+                  }
+                  if(j==3)
+                  {
+                      peak_10[k]=har[i];
+                      peak_10[k+1]=i;
+                      k += 2;
+                      i += 2;
+                  }
+              }
+              if(k>=20)
+                  break;
+          }
+          for(k=0;k<10;++k)
+          {
+              peak_10[2*k]=log(sqrtf(peak_10[2*k]));
+              peak_10[2*k+1]=(peak_10[2*k+1])*8000/256;
+          }
+          FILE *fp=fopen(_filename,"a");
+          if(fp==NULL)
+              return ;
+          fprintf(fp,"%-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f\n",
+                  peak_10[0],peak_10[1],peak_10[2],peak_10[3],peak_10[4],peak_10[5],peak_10[6],peak_10[7],peak_10[8],peak_10[9],
+                  peak_10[10],peak_10[11],peak_10[12],peak_10[13],peak_10[14],peak_10[15],peak_10[16],peak_10[17],peak_10[18],peak_10[19]);
+          fclose(fp);
+      }
+  //求取共振峰结束
+#endif
+
+
+
+  // avoid log of zero (which should be prevented anyway by dithering).
+  mel_energies_.ApplyFloor(std::numeric_limits<BaseFloat>::epsilon());
+  mel_energies_.ApplyLog();  // take the log.
+
+  feature->SetZero();  // in case there were NaNs.
+  // feature = dct_matrix_ * mel_energies [which now have log]
+  feature->AddMatVec(1.0, dct_matrix_, kNoTrans, mel_energies_, 0.0);
+
+  if (opts_.cepstral_lifter != 0.0)
+    feature->MulElements(lifter_coeffs_);
+
+  if (opts_.use_energy) {
+    if (opts_.energy_floor > 0.0 && signal_log_energy < log_energy_floor_)
+      signal_log_energy = log_energy_floor_;
+    (*feature)(0) = signal_log_energy;
+  }
+
+  if (opts_.htk_compat) {
+    BaseFloat energy = (*feature)(0);
+    for (int32 i = 0; i < opts_.num_ceps - 1; i++)
+      (*feature)(i) = (*feature)(i+1);
+    if (!opts_.use_energy)
+      energy *= M_SQRT2;  // scale on C0 (actually removing a scale
+    // we previously added that's part of one common definition of
+    // the cosine transform.)
+    (*feature)(opts_.num_ceps - 1)  = energy;
+  }
+}
+
 MfccComputer::MfccComputer(const MfccOptions &opts):
     opts_(opts), srfft_(NULL),
     mel_energies_(opts.mel_opts.num_bins) {
