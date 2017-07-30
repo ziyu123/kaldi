@@ -1,0 +1,5 @@
+compute-kaldi-pitch-feats come from kaldi kaldi-trunk/src/featbin/
+execute shell_f0.sh wav f0
+obtain wav.k.p f0 file
+for instance 
+./shell_f0.sh 1343826.good_vad.wav 1_f0

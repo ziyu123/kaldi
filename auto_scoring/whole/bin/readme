@@ -1,0 +1,16 @@
+introduction:
+
+在上一层
+tar -xvf kaldi-trunk.tar
+
+setenv.sh的变量 PACHIRA_SO 的-Wl,-rpath=需要改为你的openfst-1.3.2/lib路径
+
+./install
+执行完之后用将libpachira_score.so拷贝到当前目录，
+export指定LD_LIBRARY_PATH变量为vad的linux动态库和pachira_score的动态库路径，
+然后
+make
+执行
+./score_stream file
+file文件格式见还目录下的file文件，用|分开各个变量，|前后不能有空格，
+音频|音频对应文本|特征文件名

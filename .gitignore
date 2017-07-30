@@ -6,6 +6,21 @@
 !/src/*/Makefile
 !/src/*/README
 
+# ignore files in auto_scoring
+/auto_scoring/compare/demo/
+/auto_scoring/compare/expriment_data/
+/auto_scoring/compare/gmm/gmm-score
+/auto_scoring/compare/gmm/model/
+/auto_scoring/compare/peak/compute-peak
+/auto_scoring/compare/score/compute-mlp-feats
+
+/auto_scoring/whole/bin/auto-scoring
+/auto_scoring/whole/bin/file
+/auto_scoring/whole/bin/model/
+/auto_scoring/whole/bin/sample.fea
+/auto_scoring/whole/bin/sample.wav
+
+
 # Compiled Object files and python ciles
 *.slo
 *.lo
