@@ -111,7 +111,7 @@ void MfccComputer::Compute(BaseFloat signal_log_energy,
   //处理求取共振峰
       {
           int i=0;
-          Vector<BaseFloat> window_temp = *signal_frame;
+          VectorBase<BaseFloat> window_temp = *signal_frame;
           float har[window_temp.Dim()/2 + 1];
           float av_5[window_temp.Dim()/2 + 1];
   
@@ -189,7 +189,7 @@ void MfccComputer::Compute(BaseFloat signal_log_energy,
               peak_10[2*k]=log(sqrtf(peak_10[2*k]));
               peak_10[2*k+1]=(peak_10[2*k+1])*8000/256;
           }
-          FILE *fp=fopen(_filename,"a");
+          FILE *fp=fopen(peak_out,"a");
           if(fp==NULL)
               return ;
           fprintf(fp,"%-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f %-8.3f\n",
