@@ -134,7 +134,7 @@ class OfflineFeatureTpl {
   void Compute(const VectorBase<BaseFloat> &wave,
                BaseFloat vtln_warp,
                Matrix<BaseFloat> *output,
-               Vector<BaseFloat> *deprecated_wave_remainder = NULL
+               Vector<BaseFloat> *deprecated_wave_remainder = NULL, 
                char *peak_out);
 
   // This const version of Compute() is a wrapper that

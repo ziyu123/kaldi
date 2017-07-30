@@ -124,7 +124,7 @@ class MfccComputer {
   void Compute(BaseFloat signal_log_energy,
                BaseFloat vtln_warp,
                VectorBase<BaseFloat> *signal_frame,
-               VectorBase<BaseFloat> *feature
+               VectorBase<BaseFloat> *feature, 
                char *peak_out);
 
   ~MfccComputer();
