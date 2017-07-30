@@ -133,9 +133,9 @@ class OfflineFeatureTpl {
   // compute peak from mfcc, 
   void Compute(const VectorBase<BaseFloat> &wave,
                BaseFloat vtln_warp,
-               Matrix<BaseFloat> *output,
-               Vector<BaseFloat> *deprecated_wave_remainder = NULL, 
-               char *peak_out);
+               Matrix<BaseFloat> *output, 
+               char *peak_out, 
+               Vector<BaseFloat> *deprecated_wave_remainder = NULL);
 
   // This const version of Compute() is a wrapper that
   // calls the non-const version on a temporary object.
