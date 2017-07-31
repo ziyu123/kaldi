@@ -54,7 +54,7 @@ int get_mfcc(char *file ,char *file1, Matrix<BaseFloat> &features_r)
 	SubVector<BaseFloat> waveform(wave_data.Data(), this_chan);
 	try 
 	{
-		// mfcc.Compute(waveform, vtln_warp_local, &features, NULL,file1);
+		mfcc.ComputePeak(waveform, vtln_warp_local, &features, file1, NULL);
 		// TO DO
 		// compute peak/formant
 	} catch (...) 
