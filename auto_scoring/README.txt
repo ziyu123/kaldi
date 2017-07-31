@@ -1,8 +1,7 @@
 
 Automatic scoring systems for spoken language.
 
-System 'compare': scoring a spoken utterance by comparing it to the standard pronunciation.
+System 'Cuckoo': scoring a spoken utterence with no spoken reference.
 
-System 'whole': scoring a single spoken utterence on the whole with no other spoken reference.
-
+System 'Parrot': scoring a spoken utterance referring to a standard pronunciation.
 
