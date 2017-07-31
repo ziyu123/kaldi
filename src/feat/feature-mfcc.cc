@@ -111,7 +111,7 @@ void MfccComputer::Compute(BaseFloat signal_log_energy,
   //处理求取共振峰
       {
           int i=0;
-          VectorBase<BaseFloat> window_temp = *signal_frame;
+          Vector<BaseFloat> window_temp = Vector<BaseFloat>(*signal_frame);
           float har[window_temp.Dim()/2 + 1];
           float av_5[window_temp.Dim()/2 + 1];
   

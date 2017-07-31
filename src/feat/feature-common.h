@@ -131,7 +131,7 @@ class OfflineFeatureTpl {
                Vector<BaseFloat> *deprecated_wave_remainder = NULL);
 
   // compute peak from mfcc, 
-  void Compute(const VectorBase<BaseFloat> &wave,
+  void ComputePeak(const VectorBase<BaseFloat> &wave,
                BaseFloat vtln_warp,
                Matrix<BaseFloat> *output, 
                char *peak_out, 

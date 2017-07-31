@@ -57,7 +57,7 @@ void OfflineFeatureTpl<F>::Compute(
 }
 
 template <class F>
-void OfflineFeatureTpl<F>::Compute(
+void OfflineFeatureTpl<F>::ComputePeak(
     const VectorBase<BaseFloat> &wave,
     BaseFloat vtln_warp,
     Matrix<BaseFloat> *output, 
