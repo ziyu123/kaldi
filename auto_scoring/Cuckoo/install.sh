@@ -5,31 +5,16 @@ path=`pwd`
 
 if [ "$1" == clean ]
 then
-	cd ${path}/pachira_score/src
-	make $1
-
-	cd engine
-	make $1
-
-	cd ${path}/pachira_score/mlp
-	make $1
-
-	cd ${path}/pachira_score/lib
-	make $1
+	make -C lib/src clean
+	make -C lib/src/engine clean
+	make -C lib/mlp clean
+	make -C bin clean
 else
-	. setenv.sh
-	cd ${path}/pachira_score/src
-	make 
-	cp *.o ${path}/pachira_score/lib
+	make -C lib/src
+        make -C lib/src/engine
+        make -C lib/mlp
 
-	cd engine
-	make 
-	cp *.o ${path}/pachira_score/lib
-
-	cd ${path}/pachira_score/mlp
-	make 
-	cp *.o ${path}/pachira_score/lib
-
-	cd ${path}/pachira_score/lib
-	make
+	cp lib/*/*.o lib/*/*/*.o lib
+	make -C lib 
+	make -C bin
 fi

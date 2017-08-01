@@ -31,12 +31,12 @@
 
 #ifdef __unix__
 	#define PACHIRA_DEBUG log_out
-	std::fstream log_out("./log",std::fstream::out | std::fstream::app );
+	std::fstream log_out("./log.testlog",std::fstream::out | std::fstream::app );
 #elif IOS
 	#define PACHIRA_DEBUG std::cerr 
 #elif __ANDROID_API__
 	#define PACHIRA_DEBUG log_out
-	std::fstream log_out("/mnt/sdcard/MoFang/log",std::fstream::out | std::fstream::app );
+	std::fstream log_out("/mnt/sdcard/MoFang/log.testlog",std::fstream::out | std::fstream::app );
 #elif WP8
 	#define PACHIRA_DEBUG log_out
 	my_io::stream<My_Sink> log_out(0);

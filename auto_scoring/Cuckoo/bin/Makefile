@@ -16,7 +16,7 @@ all: auto-scoring
 
 auto-scoring: score_stream.o
 	$(GXX) $(LDFLAGS) -o $@ $^ -L. -lauto_score \
-	-Wl,-rpath=/work7/tangzy/github/auto_scoring_20170726/auto_scoring/whole/lib
+	-Wl,-rpath=/work7/tangzy/github/auto_scoring_20170726/auto_scoring/Cuckoo/lib
 
 score_stream.o: score_stream.cc
 	$(GXX) $(CXXFLAGS) $(INCLUDE) -o $@ $<
