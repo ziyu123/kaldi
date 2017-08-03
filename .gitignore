@@ -7,18 +7,18 @@
 !/src/*/README
 
 # ignore files in auto_scoring
-/auto_scoring/compare/demo/
-/auto_scoring/compare/expriment_data/
-/auto_scoring/compare/gmm/gmm-score
-/auto_scoring/compare/gmm/model/
-/auto_scoring/compare/peak/compute-peak
-/auto_scoring/compare/score/compute-mlp-feats
+/auto_scoring/Parrot/demo/
+/auto_scoring/Parrot/expriment_data/
+/auto_scoring/Parrot/gmm/gmm-score
+/auto_scoring/Parrot/gmm/model/
+/auto_scoring/Parrot/peak/compute-peak
+/auto_scoring/Parrot/score/compute-mlp-feats
 
-/auto_scoring/whole/bin/auto-scoring
-/auto_scoring/whole/bin/file
-/auto_scoring/whole/bin/model/
-/auto_scoring/whole/bin/sample.fea
-/auto_scoring/whole/bin/sample.wav
+/auto_scoring/Cuckoo/bin/auto-scoring
+/auto_scoring/Cuckoo/bin/file
+/auto_scoring/Cuckoo/bin/model/
+/auto_scoring/Cuckoo/bin/sample.fea
+/auto_scoring/Cuckoo/bin/sample.wav
 
 
 # Compiled Object files and python ciles

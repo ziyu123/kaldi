@@ -18,11 +18,11 @@ SHELL := /bin/bash
 #          ivector ivectorbin online2 online2bin lmbin
 
 SUBDIRS = base matrix util feat tree gmm transform \
-          fstext hmm lm decoder lat cudamatrix nnet featbin \
+          fstext hmm lm decoder lat cudamatrix nnet bin featbin \
           nnet3 chain nnet3bin
 
 MEMTESTDIRS = base matrix util feat tree gmm transform \
-          fstext hmm lm decoder lat nnet chain featbin \
+          fstext hmm lm decoder lat nnet chain bin featbin \
           nnet3 nnet3bin
 
 CUDAMEMTESTDIR = cudamatrix
