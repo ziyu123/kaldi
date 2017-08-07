@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
             KALDI_WARN << "this_utt has "
                        << num_chan << " channels but you specified channel "
                        << channel << ", producing no output.";
-            continue;
+            return 0;
           }
         }
       }
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
       if (vtln_map_rspecifier != "") {
         if (!vtln_map_reader.HasKey("this_utt")) {
           KALDI_WARN << "No vtln-map entry for utterance-id (or speaker-id) this_utt";
-          continue;
+          return 0;
         }
         vtln_warp_local = vtln_map_reader.Value("this_utt");
       } else {
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 
       SubVector<BaseFloat> waveform(wave_data.Data(), this_chan);
       Matrix<BaseFloat> features;
-      char *peak_out = out_path.data();
+      const char *peak_out = out_path.data();
       try {
         mfcc.ComputePeak(waveform, vtln_warp_local, &features, peak_out, NULL);
       } catch (...) {
