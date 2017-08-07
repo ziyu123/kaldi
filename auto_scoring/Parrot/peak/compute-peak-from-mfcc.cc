@@ -1,4 +1,4 @@
-// featbin/compute-mfcc-feats.cc
+// featbin/compute-peak-from-mfcc.cc
 
 // Copyright 2009-2012  Microsoft Corporation
 //                      Johns Hopkins University (author: Daniel Povey)
@@ -27,8 +27,8 @@ int main(int argc, char *argv[]) {
   try {
     using namespace kaldi;
     const char *usage =
-        "Create MFCC feature files.\n"
-        "Usage:  compute-mfcc-feats [options...] <wav-rspecifier> <feats-wspecifier>\n";
+        "Create peak positions from MFCC feature.\n"
+        "Usage:  compute-peak-from-mfcc [options...] <wav-path> <output-path>\n";
 
     // construct all the global objects
     ParseOptions po(usage);
@@ -68,43 +68,25 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
 
-    std::string wav_rspecifier = po.GetArg(1);
+    std::string wav_path = po.GetArg(1);
 
-    std::string output_wspecifier = po.GetArg(2);
+    std::string out_path = po.GetArg(2);
 
     Mfcc mfcc(mfcc_opts);
-
-    SequentialTableReader<WaveHolder> reader(wav_rspecifier);
-    BaseFloatMatrixWriter kaldi_writer;  // typedef to TableWriter<something>.
-    TableWriter<HtkMatrixHolder> htk_writer;
 
     if (utt2spk_rspecifier != "")
       KALDI_ASSERT(vtln_map_rspecifier != "" && "the utt2spk option is only "
                    "needed if the vtln-map option is used.");
     RandomAccessBaseFloatReaderMapped vtln_map_reader(vtln_map_rspecifier,
                                                       utt2spk_rspecifier);
-    
-    if (output_format == "kaldi") {
-      if (!kaldi_writer.Open(output_wspecifier))
-        KALDI_ERR << "Could not initialize output with wspecifier "
-                  << output_wspecifier;
-    } else if (output_format == "htk") {
-      if (!htk_writer.Open(output_wspecifier))
-        KALDI_ERR << "Could not initialize output with wspecifier "
-                  << output_wspecifier;
-    } else {
-      KALDI_ERR << "Invalid output_format string " << output_format;
-    }
 
-    int32 num_utts = 0, num_success = 0;
-    for (; !reader.Done(); reader.Next()) {
-      num_utts++;
-      std::string utt = reader.Key();
-      const WaveData &wave_data = reader.Value();
+      Input ki(wav_path);
+      WaveData wave_data ;
+      wave_data.Read(ki.Stream());
       if (wave_data.Duration() < min_duration) {
-        KALDI_WARN << "File: " << utt << " is too short ("
+        KALDI_WARN << "File is too short ("
                    << wave_data.Duration() << " sec): producing no output.";
-        continue;
+        return 0;
       }
       int32 num_chan = wave_data.Data().NumRows(), this_chan = channel;
       {  // This block works out the channel (0=left, 1=right...)
@@ -117,7 +99,7 @@ int main(int argc, char *argv[]) {
                        << num_chan  << " channels; defaulting to zero";
         } else {
           if (this_chan >= num_chan) {
-            KALDI_WARN << "File with id " << utt << " has "
+            KALDI_WARN << "this_utt has "
                        << num_chan << " channels but you specified channel "
                        << channel << ", producing no output.";
             continue;
@@ -126,12 +108,11 @@ int main(int argc, char *argv[]) {
       }
       BaseFloat vtln_warp_local;  // Work out VTLN warp factor.
       if (vtln_map_rspecifier != "") {
-        if (!vtln_map_reader.HasKey(utt)) {
-          KALDI_WARN << "No vtln-map entry for utterance-id (or speaker-id) "
-                     << utt;
+        if (!vtln_map_reader.HasKey("this_utt")) {
+          KALDI_WARN << "No vtln-map entry for utterance-id (or speaker-id) this_utt";
           continue;
         }
-        vtln_warp_local = vtln_map_reader.Value(utt);
+        vtln_warp_local = vtln_map_reader.Value("this_utt");
       } else {
         vtln_warp_local = vtln_warp;
       }
@@ -139,48 +120,20 @@ int main(int argc, char *argv[]) {
         KALDI_ERR << "Sample frequency mismatch: you specified "
                   << mfcc_opts.frame_opts.samp_freq << " but data has "
                   << wave_data.SampFreq() << " (use --sample-frequency "
-                  << "option).  Utterance is " << utt;
+                  << "option).";
 
       SubVector<BaseFloat> waveform(wave_data.Data(), this_chan);
       Matrix<BaseFloat> features;
+      char *peak_out = out_path.data();
       try {
-        mfcc.Compute(waveform, vtln_warp_local, &features, NULL);
+        mfcc.ComputePeak(waveform, vtln_warp_local, &features, peak_out, NULL);
       } catch (...) {
-        KALDI_WARN << "Failed to compute features for utterance "
-                   << utt;
-        continue;
+        KALDI_WARN << "Failed to compute features for this utterance.";
+        return 0;
       }
-      if (subtract_mean) {
-        Vector<BaseFloat> mean(features.NumCols());
-        mean.AddRowSumMat(1.0, features);
-        mean.Scale(1.0 / features.NumRows());
-        for (int32 i = 0; i < features.NumRows(); i++)
-          features.Row(i).AddVec(-1.0, mean);
-      }
-      if (output_format == "kaldi") {
-        kaldi_writer.Write(utt, features);
-      } else {
-        std::pair<Matrix<BaseFloat>, HtkHeader> p;
-        p.first.Resize(features.NumRows(), features.NumCols());
-        p.first.CopyFromMat(features);
-        HtkHeader header = {
-          features.NumRows(),
-          100000,  // 10ms shift
-          static_cast<int16>(sizeof(float)*(features.NumCols())),
-          static_cast<uint16>( 006 | // MFCC
-          (mfcc_opts.use_energy ? 0100 : 020000)) // energy; otherwise c0
-        };
-        p.second = header;
-        htk_writer.Write(utt, p);
-      }
-      if (num_utts % 10 == 0)
-        KALDI_LOG << "Processed " << num_utts << " utterances";
-      KALDI_VLOG(2) << "Processed features for key " << utt;
-      num_success++;
-    }
-    KALDI_LOG << " Done " << num_success << " out of " << num_utts
-              << " utterances.";
-    return (num_success != 0 ? 0 : 1);
+  
+
+    KALDI_LOG << " Done the computation of extracting peak positions from mfcc.";
   } catch(const std::exception &e) {
     std::cerr << e.what();
     return -1;
