@@ -69,7 +69,6 @@ int main(int argc, char *argv[]) {
     }
 
     std::string wav_path = po.GetArg(1);
-
     std::string out_path = po.GetArg(2);
 
     Mfcc mfcc(mfcc_opts);
@@ -80,58 +79,56 @@ int main(int argc, char *argv[]) {
     RandomAccessBaseFloatReaderMapped vtln_map_reader(vtln_map_rspecifier,
                                                       utt2spk_rspecifier);
 
-      Input ki(wav_path);
-      WaveData wave_data ;
-      wave_data.Read(ki.Stream());
-      if (wave_data.Duration() < min_duration) {
-        KALDI_WARN << "File is too short ("
-                   << wave_data.Duration() << " sec): producing no output.";
-        return 0;
-      }
-      int32 num_chan = wave_data.Data().NumRows(), this_chan = channel;
-      {  // This block works out the channel (0=left, 1=right...)
-        KALDI_ASSERT(num_chan > 0);  // should have been caught in
-        // reading code if no channels.
-        if (channel == -1) {
-          this_chan = 0;
-          if (num_chan != 1)
-            KALDI_WARN << "Channel not specified but you have data with "
-                       << num_chan  << " channels; defaulting to zero";
-        } else {
-          if (this_chan >= num_chan) {
-            KALDI_WARN << "this_utt has "
-                       << num_chan << " channels but you specified channel "
-                       << channel << ", producing no output.";
-            return 0;
-          }
-        }
-      }
-      BaseFloat vtln_warp_local;  // Work out VTLN warp factor.
-      if (vtln_map_rspecifier != "") {
-        if (!vtln_map_reader.HasKey("this_utt")) {
-          KALDI_WARN << "No vtln-map entry for utterance-id (or speaker-id) this_utt";
+    Input ki(wav_path);
+    WaveData wave_data ;
+    wave_data.Read(ki.Stream());
+    if (wave_data.Duration() < min_duration) {
+      KALDI_WARN << "File is too short ("
+                 << wave_data.Duration() << " sec): producing no output.";
+      return 0;
+    }
+    int32 num_chan = wave_data.Data().NumRows(), this_chan = channel;
+    {  // This block works out the channel (0=left, 1=right...)
+      KALDI_ASSERT(num_chan > 0);  // should have been caught in
+      // reading code if no channels.
+      if (channel == -1) {
+        this_chan = 0;
+        if (num_chan != 1)
+          KALDI_WARN << "Channel not specified but you have data with "
+                     << num_chan  << " channels; defaulting to zero";
+      } else {
+        if (this_chan >= num_chan) {
+          KALDI_WARN << "this_utt has "
+                     << num_chan << " channels but you specified channel "
+                     << channel << ", producing no output.";
           return 0;
         }
-        vtln_warp_local = vtln_map_reader.Value("this_utt");
-      } else {
-        vtln_warp_local = vtln_warp;
       }
-      if (mfcc_opts.frame_opts.samp_freq != wave_data.SampFreq())
-        KALDI_ERR << "Sample frequency mismatch: you specified "
-                  << mfcc_opts.frame_opts.samp_freq << " but data has "
-                  << wave_data.SampFreq() << " (use --sample-frequency "
-                  << "option).";
-
-      SubVector<BaseFloat> waveform(wave_data.Data(), this_chan);
-      Matrix<BaseFloat> features;
-      const char *peak_out = out_path.data();
-      try {
-        mfcc.ComputePeak(waveform, vtln_warp_local, &features, peak_out, NULL);
-      } catch (...) {
-        KALDI_WARN << "Failed to compute features for this utterance.";
+    }
+    BaseFloat vtln_warp_local;  // Work out VTLN warp factor.
+    if (vtln_map_rspecifier != "") {
+      if (!vtln_map_reader.HasKey("this_utt")) {
+        KALDI_WARN << "No vtln-map entry for utterance-id (or speaker-id) this_utt";
         return 0;
       }
-  
+      vtln_warp_local = vtln_map_reader.Value("this_utt");
+    } else {
+      vtln_warp_local = vtln_warp;
+    }
+    if (mfcc_opts.frame_opts.samp_freq != wave_data.SampFreq())
+      KALDI_ERR << "Sample frequency mismatch: you specified "
+                << mfcc_opts.frame_opts.samp_freq << " but data has "
+                << wave_data.SampFreq() << " (use --sample-frequency "
+                << "option).";
+    SubVector<BaseFloat> waveform(wave_data.Data(), this_chan);
+    Matrix<BaseFloat> features;
+    const char *peak_out = out_path.data();
+    try {
+      mfcc.ComputePeak(waveform, vtln_warp_local, &features, peak_out, NULL);
+    } catch (...) {
+      KALDI_WARN << "Failed to compute features for this utterance.";
+      return 0;
+    } 
 
     KALDI_LOG << " Done the computation of extracting peak positions from mfcc.";
   } catch(const std::exception &e) {
