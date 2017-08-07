@@ -125,7 +125,7 @@ class MfccComputer {
                BaseFloat vtln_warp,
                VectorBase<BaseFloat> *signal_frame,
                VectorBase<BaseFloat> *feature, 
-               char *peak_out);
+               const char *peak_out);
 
   ~MfccComputer();
  private:

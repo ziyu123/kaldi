@@ -61,7 +61,7 @@ void OfflineFeatureTpl<F>::ComputePeak(
     const VectorBase<BaseFloat> &wave,
     BaseFloat vtln_warp,
     Matrix<BaseFloat> *output, 
-    char *peak_out,
+    const char *peak_out,
     Vector<BaseFloat> *deprecated_wave_remainder) {
   KALDI_ASSERT(output != NULL);
   int32 rows_out = NumFrames(wave.Dim(), computer_.GetFrameOptions()),
