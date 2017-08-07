@@ -34,6 +34,7 @@ all: compute-peak-from-mfcc
 compute-peak-from-mfcc: compute-peak-from-mfcc.o
 	$(GXX) $(LDFLAGS) $(LDLIBS) -o $@ $^
 
+compute-peak-from-mfcc.o: compute-peak-from-mfcc.cc
 	$(GXX) $(CXXFLAGS) $(INCLUDE) -o $@ $^
 
 clean:
