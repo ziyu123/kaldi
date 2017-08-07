@@ -11,7 +11,7 @@
 /auto_scoring/Parrot/expriment_data/
 /auto_scoring/Parrot/gmm/gmm-score
 /auto_scoring/Parrot/gmm/model/
-/auto_scoring/Parrot/peak/compute-peak
+/auto_scoring/Parrot/peak/compute-peak-from-mfcc
 /auto_scoring/Parrot/score/compute-mlp-feats
 
 /auto_scoring/Cuckoo/bin/auto-scoring
