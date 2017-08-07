@@ -79,13 +79,12 @@ void MfccComputer::Compute(BaseFloat signal_log_energy,
   }
 }
 
+// compute peak
 void MfccComputer::Compute(BaseFloat signal_log_energy,
                            BaseFloat vtln_warp,
                            VectorBase<BaseFloat> *signal_frame,
-                           VectorBase<BaseFloat> *feature, 
                            const char *peak_out) {
-  KALDI_ASSERT(signal_frame->Dim() == opts_.frame_opts.PaddedWindowSize() &&
-               feature->Dim() == this->Dim());
+  KALDI_ASSERT(signal_frame->Dim() == opts_.frame_opts.PaddedWindowSize());
 
   const MelBanks &mel_banks = *(GetMelBanks(vtln_warp));
 
@@ -200,35 +199,6 @@ void MfccComputer::Compute(BaseFloat signal_log_energy,
   //求取共振峰结束
 #endif
 
-
-
-  // avoid log of zero (which should be prevented anyway by dithering).
-  mel_energies_.ApplyFloor(std::numeric_limits<BaseFloat>::epsilon());
-  mel_energies_.ApplyLog();  // take the log.
-
-  feature->SetZero();  // in case there were NaNs.
-  // feature = dct_matrix_ * mel_energies [which now have log]
-  feature->AddMatVec(1.0, dct_matrix_, kNoTrans, mel_energies_, 0.0);
-
-  if (opts_.cepstral_lifter != 0.0)
-    feature->MulElements(lifter_coeffs_);
-
-  if (opts_.use_energy) {
-    if (opts_.energy_floor > 0.0 && signal_log_energy < log_energy_floor_)
-      signal_log_energy = log_energy_floor_;
-    (*feature)(0) = signal_log_energy;
-  }
-
-  if (opts_.htk_compat) {
-    BaseFloat energy = (*feature)(0);
-    for (int32 i = 0; i < opts_.num_ceps - 1; i++)
-      (*feature)(i) = (*feature)(i+1);
-    if (!opts_.use_energy)
-      energy *= M_SQRT2;  // scale on C0 (actually removing a scale
-    // we previously added that's part of one common definition of
-    // the cosine transform.)
-    (*feature)(opts_.num_ceps - 1)  = energy;
-  }
 }
 
 MfccComputer::MfccComputer(const MfccOptions &opts):

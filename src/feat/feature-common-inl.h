@@ -60,19 +60,16 @@ template <class F>
 void OfflineFeatureTpl<F>::ComputePeak(
     const VectorBase<BaseFloat> &wave,
     BaseFloat vtln_warp,
-    Matrix<BaseFloat> *output, 
     const char *peak_out,
     Vector<BaseFloat> *deprecated_wave_remainder) {
-  KALDI_ASSERT(output != NULL);
+  KALDI_ASSERT(peak_out != NULL);
   int32 rows_out = NumFrames(wave.Dim(), computer_.GetFrameOptions()),
       cols_out = computer_.Dim();
   if (rows_out == 0) {
-    output->Resize(0, 0);
     if (deprecated_wave_remainder != NULL)
       *deprecated_wave_remainder = wave;
     return;
   }
-  output->Resize(rows_out, cols_out);
   if (deprecated_wave_remainder != NULL)
     ExtractWaveformRemainder(wave, computer_.GetFrameOptions(),
                              deprecated_wave_remainder);
@@ -84,8 +81,7 @@ void OfflineFeatureTpl<F>::ComputePeak(
                   feature_window_function_, &window,
                   (use_raw_log_energy ? &raw_log_energy : NULL));
 
-    SubVector<BaseFloat> output_row(*output, r);
-    computer_.Compute(raw_log_energy, vtln_warp, &window, &output_row, peak_out);
+    computer_.Compute(raw_log_energy, vtln_warp, &window, peak_out);
   }
 }
 

@@ -121,10 +121,9 @@ int main(int argc, char *argv[]) {
                 << wave_data.SampFreq() << " (use --sample-frequency "
                 << "option).";
     SubVector<BaseFloat> waveform(wave_data.Data(), this_chan);
-    Matrix<BaseFloat> features;
     const char *peak_out = out_path.data();
     try {
-      mfcc.ComputePeak(waveform, vtln_warp_local, &features, peak_out, NULL);
+      mfcc.ComputePeak(waveform, vtln_warp_local, peak_out, NULL);
     } catch (...) {
       KALDI_WARN << "Failed to compute features for this utterance.";
       return 0;

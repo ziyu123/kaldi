@@ -130,10 +130,9 @@ class OfflineFeatureTpl {
                Matrix<BaseFloat> *output,
                Vector<BaseFloat> *deprecated_wave_remainder = NULL);
 
-  // compute peak from mfcc, 
+  // extract peak positions from spectrum, in feature-mfcc.h
   void ComputePeak(const VectorBase<BaseFloat> &wave,
                BaseFloat vtln_warp,
-               Matrix<BaseFloat> *output, 
                const char *peak_out, 
                Vector<BaseFloat> *deprecated_wave_remainder = NULL);
 
