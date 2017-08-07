@@ -21,8 +21,8 @@ f01=$wav1.f0
 f02=$wav2.f0
 
 cd $work_path/peak
-$work_path/peak/compute-peak $wav1 $peak1
-$work_path/peak/compute-peak $wav2 $peak2
+$work_path/peak/compute-peak-from-mfcc --sample-frequency=8000 $wav1 $peak1
+$work_path/peak/compute-peak-from-mfcc --sample-frequency=8000 $wav2 $peak2
 
 
 cd $work_path/pitch
