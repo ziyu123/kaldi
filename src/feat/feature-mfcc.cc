@@ -131,36 +131,7 @@ void MfccComputer::Compute(BaseFloat signal_log_energy,
                   av_5[i] += har[j];
               }
               av_5[i] /=5;
-              //printf("%f ",log(sqrtf(av_5[i])));
-  //          printf("%f ",log(sqrtf(har[i])));
           }
-  //      printf("\n");
-      /*
-#define START_F 0
-#define P_N 4
-          for(i=START_F;i+P_N*2<window.Dim()/2 ;++i)
-          {
-              if(av_5[i] > av_5[i-1] && av_5[i] > av_5[i+1])
-              {
-                  for(j=2;j<P_N;j++)
-                  {
-                      if((i >= j && av_5[i] < av_5[i-j]) || av_5[i] < av_5[i+j])
-                      {
-                          break;
-                      }
-                  }
-                  if(j == P_N)
-                  {
-                      peak_4[k]=av_5[i];
-                      peak_4[k+1]=i;
-                      k += 2;
-                      i += P_N;
-                  }
-                  if(k>=8)
-                      break;
-              }
-          }
-          */
   
           for(i=1;i+1<window_temp.Dim()/2;++i)
           {
@@ -185,8 +156,8 @@ void MfccComputer::Compute(BaseFloat signal_log_energy,
           }
           for(k=0;k<10;++k)
           {
-              peak_10[2*k]=log(sqrtf(peak_10[2*k]));
-              peak_10[2*k+1]=(peak_10[2*k+1])*8000/256;
+              peak_10[2*k]=log(sqrtf(peak_10[2*k])); //value
+              peak_10[2*k+1]=(peak_10[2*k+1])*8000/256; //position
           }
           FILE *fp=fopen(peak_out,"a");
           if(fp==NULL)
