@@ -29,16 +29,16 @@ LDLIBS = $(KALDI_LIBS) $(MKL_LIBS)
 
 
 
-all: compute-peak-from-mfcc
+all: compute-peak-from-spectrum
 
-compute-peak-from-mfcc: compute-peak-from-mfcc.o
+compute-peak-from-spectrum: compute-peak-from-spectrum.o
 	$(GXX) $(LDFLAGS) $(LDLIBS) -o $@ $^
 
-compute-peak-from-mfcc.o: compute-peak-from-mfcc.cc
+compute-peak-from-spectrum.o: compute-peak-from-spectrum.cc
 	$(GXX) $(CXXFLAGS) $(INCLUDE) -o $@ $^
 
 clean:
-	-rm compute-peak-from-mfcc compute-peak-from-mfcc.o
+	-rm compute-peak-from-spectrum compute-peak-from-spectrum.o
 
 
 
