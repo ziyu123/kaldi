@@ -63,8 +63,7 @@ void OfflineFeatureTpl<F>::ComputePeak(
     const char *peak_out,
     Vector<BaseFloat> *deprecated_wave_remainder) {
   KALDI_ASSERT(peak_out != NULL);
-  int32 rows_out = NumFrames(wave.Dim(), computer_.GetFrameOptions()),
-      cols_out = computer_.Dim();
+  int32 rows_out = NumFrames(wave.Dim(), computer_.GetFrameOptions());
   if (rows_out == 0) {
     if (deprecated_wave_remainder != NULL)
       *deprecated_wave_remainder = wave;

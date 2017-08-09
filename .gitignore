@@ -7,10 +7,10 @@
 !/src/*/README
 
 # ignore files in auto_scoring
-/auto_scoring/Parrot/demo/
-/auto_scoring/Parrot/expriment_data/
+/auto_scoring/Parrot/demo
+/auto_scoring/Parrot/expriment_data
 /auto_scoring/Parrot/gmm/gmm-score
-/auto_scoring/Parrot/gmm/model/
+/auto_scoring/Parrot/gmm/model
 /auto_scoring/Parrot/peak/compute-peak-from-mfcc
 /auto_scoring/Parrot/score/compute-mlp-feats
 
