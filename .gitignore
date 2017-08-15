@@ -6,19 +6,18 @@
 !/src/*/Makefile
 !/src/*/README
 
-# ignore files in auto_scoring
-/auto_scoring/Parrot/demo/
-/auto_scoring/Parrot/expriment_data/
-/auto_scoring/Parrot/gmm/gmm-score
-/auto_scoring/Parrot/gmm/model/
-/auto_scoring/Parrot/peak/compute-peak-from-spectrum
-/auto_scoring/Parrot/score/compute-mlp-feats
+# ignore files in VV_scoring
+/VV_scoring/Parrot/demo/
+/VV_scoring/Parrot/expriment_data/
+/VV_scoring/Parrot/gmm/gmm-score
+/VV_scoring/Parrot/gmm/model/
+/VV_scoring/Parrot/peak/compute-peak-from-spectrum
+/VV_scoring/Parrot/score/compute-mlp-feats
 
-/auto_scoring/Cuckoo/bin/auto-scoring
-/auto_scoring/Cuckoo/bin/file
-/auto_scoring/Cuckoo/bin/model/
-/auto_scoring/Cuckoo/bin/sample.fea
-/auto_scoring/Cuckoo/bin/sample.wav
+/VV_scoring/Cuckoo/bin/auto-scoring
+/VV_scoring/Cuckoo/bin/file
+/VV_scoring/Cuckoo/bin/model/
+/VV_scoring/Cuckoo/bin/sample.*
 
 
 # Compiled Object files and python ciles

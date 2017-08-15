@@ -98,13 +98,22 @@ int main(int argc,char *argv[])
 		cut_str(test,'|',3,aaa);
 	//	printf("%s %s\n",temp,file);
 	//
+#define VAD
 #ifdef VAD
-		char vad_wav[FILE_LONG]="/home/hubo/git/Pingce/vad/linux/test/vad_test ";
+		char vad_wav[FILE_LONG]="/work7/tangzy/github/auto_scoring_20170726/auto_scoring/Cuckoo/bin/vad.ark";
 	//	char *abc="Today I want to tell you three stories from my life";
 		strcat(vad_wav,temp[0]);
+		printf(vad_wav);
+
 		strcat(vad_wav," temp.wav");
+		printf(vad_wav);
+
 		system(vad_wav);
 		fprintf(stderr,"%s| %s |%s   ",temp[0],temp[1],temp[2]);
+		printf(temp[0]);
+		printf(temp[1]);
+		printf(temp[2]);
+
 		printf("vad\n");
 		if(comp_test("temp.wav",temp[1],temp[2])!=0)
 #else
