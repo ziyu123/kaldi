@@ -6,6 +6,11 @@
 !/src/*/Makefile
 !/src/*/README
 
+# Ignore files in VV_scoring
+/VV_scoring/Parrot/data/*
+/VV_scoring/Parrot/model/*
+
+
 # Compiled Object files and python ciles
 *.slo
 *.lo
