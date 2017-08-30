@@ -6,7 +6,6 @@ data_dir=data
 lang_dir=data/lang
 nnet3_dir=model
 
-#compute-fbank-feats --verbose=2 --config=$nnet3_dir/conf/fbank.conf scp,p:$data_dir/wav.scp ark:- | copy-feats --compress=true ark:- ark,scp:$data_dir/feats.ark,$data_dir/feats.scp
 compute-fbank-feats --config=$nnet3_dir/conf/fbank.conf scp:$data_dir/wav.scp ark:$data_dir/feats.ark
 
 compile-train-graphs --read-disambig-syms=$lang_dir/phones/disambig.int \

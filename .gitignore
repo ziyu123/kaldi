@@ -7,6 +7,12 @@
 !/src/*/README
 
 # Ignore files in VV_scoring
+/VV_scoring/src/*/*
+!/VV_scoring/src/*/*.*
+!/VV_scoring/src/doc/*
+!/VV_scoring/src/*/Makefile
+!/VV_scoring/src/*/README
+
 /VV_scoring/Parrot/data/*
 /VV_scoring/Parrot/model/*
 
