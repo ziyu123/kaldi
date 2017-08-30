@@ -7,7 +7,7 @@ CXXFLAGS += -I../../../src
 LDFLAGS += $(CUDA_LDFLAGS)
 LDLIBS += $(CUDA_LDLIBS)
 
-BINFILES = ll-score-with-referred-text-wav
+BINFILES = ll-score-with-referred-text-wav ll-score-with-referred-text
 
 OBJFILES =
 
