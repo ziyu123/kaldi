@@ -1,4 +1,4 @@
-// likelihoodbin/ll-compare-with-referred-text-wav.cc, from
+// likelihoodbin/ll-score-with-referred-text-wav.cc, from
 // nnet3bin/nnet3-align-compiled.cc
 
 // Copyright 2009-2012     Microsoft Corporation
