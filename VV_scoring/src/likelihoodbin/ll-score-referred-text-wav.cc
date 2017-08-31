@@ -1,4 +1,4 @@
-// likelihoodbin/ll-score-with-referred-text.cc, from
+// likelihoodbin/ll-score-referred-text-wav.cc, from
 // nnet3bin/nnet3-align-compiled.cc
 
 // Copyright 2009-2012     Microsoft Corporation
@@ -61,8 +61,6 @@ int main(int argc, char *argv[]) {
     BaseFloat self_loop_scale = 1.0;
     std::string per_frame_acwt_wspecifier;
 
-    BaseFloat avg_like_ref = 6.0;  // provided for reference
-
     std::string ivector_rspecifier,
         online_ivector_rspecifier,
         utt2spk_rspecifier;
@@ -89,8 +87,6 @@ int main(int argc, char *argv[]) {
     po.Register("online-ivector-period", &online_ivector_period, "Number of frames "
                 "between iVectors in matrices supplied to the --online-ivectors "
                 "option");
-    po.Register("referred-average-likelihood", &avg_like_ref, "average (log)likelihood of "
-                "well spoken wavs such as in ASR training set");
     po.Read(argc, argv);
 
     if (po.NumArgs() < 4 || po.NumArgs() > 5) {
@@ -111,7 +107,8 @@ int main(int argc, char *argv[]) {
     int num_done = 0, num_err = 0, num_retry = 0;
     double tot_like = 0.0;
     kaldi::int64 frame_count = 0;
-    double avg_like = 0.0;  // average likelihood of candidate wav, the only one in features-rspecifier
+    double avg_like_ref = 0.0;  // average likelihood of referred wav, the 1st in features-rspecifier
+    double avg_like = 0.0;  // average likelihood of candidate wav, the 2nd in features-rspecifier
 
 
     {
@@ -143,8 +140,8 @@ int main(int argc, char *argv[]) {
       BaseFloatWriter scores_writer(scores_wspecifier);
       BaseFloatVectorWriter per_frame_acwt_writer(per_frame_acwt_wspecifier);
 
-      // only candidate wavs to be processed
-      for (; !fst_reader.Done(); fst_reader.Next()) {
+      // only 2 wavs (referred and candidate) to be processed
+      for (int16 i = 0; !fst_reader.Done() && i <= 1; fst_reader.Next(), i++) {
         std::string utt = fst_reader.Key();
         if (!feature_reader.HasKey(utt)) {
           KALDI_WARN << "No features for utterance " << utt;
@@ -203,12 +200,17 @@ int main(int argc, char *argv[]) {
                               &num_done, &num_err, &num_retry,
                               &tot_like, &frame_count, &per_frame_acwt_writer);
 
+        if (i == 0) {
+            avg_like_ref = tot_like/frame_count;
+            tot_like = 0.0;
+            frame_count = 0;
+            continue;
+        }
         avg_like = tot_like/frame_count;
-        break;
       }
 
-      if (num_done < 1) {
-        KALDI_LOG << "No wav provided.";
+      if (num_done < 2) {
+        KALDI_LOG << num_done <<" wav(s) provided, not enough.";
         return 0;
       }
       // score based on average likelihood, total is 100
@@ -226,5 +228,4 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 }
-
 
