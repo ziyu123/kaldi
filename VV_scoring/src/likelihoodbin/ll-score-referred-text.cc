@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
 
       if (num_done < 1) {
         KALDI_LOG << "No wav provided.";
-        return 0;
+        return 1;
       }
       // score based on average likelihood, total is 100
       double score = avg_like / avg_like_ref * 100;
