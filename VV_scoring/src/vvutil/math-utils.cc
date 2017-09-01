@@ -19,18 +19,19 @@
 
 #include "vvutil/math-utils.h"
 #include <numeric>
-
+#include <algorithm>
+#include <functional>
 
 namespace kaldi {
 
 
 double CorrelationOfTwoVectors(std::vector<double> x, std::vector<double> y) {
-  KALDI_ASSERT(x.size()==y.size());
+  KALDI_ASSERT(x.size()==y.size() && x.size()>0);
   int len = x.size();
 
   // mean
   double e_x, e_y;
-  e_x = (std::accumulate(x.begin(), x.end(), 0.0)) / len;
+  e_x = (std::accumulate(x.begin(), x.end(), 0.0)) / len;  // <numeric>
   e_y = (std::accumulate(y.begin(), y.end(), 0.0)) / len;
 
   // variance, covariance
@@ -39,7 +40,7 @@ double CorrelationOfTwoVectors(std::vector<double> x, std::vector<double> y) {
     x[i] -= e_x;
     y[i] -= e_y;
   }
-  v_x = (std::inner_product(x.begin(), x.end(), x.begin(), 0.0)) / len;
+  v_x = (std::inner_product(x.begin(), x.end(), x.begin(), 0.0)) / len;  // <numeric>
   v_y = (std::inner_product(y.begin(), y.end(), y.begin(), 0.0)) / len;
   cov = (std::inner_product(x.begin(), x.end(), y.begin(), 0.0)) / len;
 
@@ -47,6 +48,28 @@ double CorrelationOfTwoVectors(std::vector<double> x, std::vector<double> y) {
   double corr = cov/sqrt(v_x*v_y);
   return corr;
 }
+
+
+double SimilarityOfTwoVectors(std::vector<double> x, std::vector<double> y) {
+  KALDI_ASSERT(x.size()==y.size() && x.size()>0);
+  int len = x.size();
+
+  // element-wise x^2, y^2, xy
+  // similarity is average of sum 2xy/(x^2+y^2)
+  double x2;
+  double y2;
+  double xy;
+  double similarity = 0.0;
+  for(int i = 0; i < len; i++) {
+    x2 = x[i]*x[i];
+    y2 = y[i]*y[i];
+    xy = x[i]*y[i];
+    similarity += xy * 2 / (x2 + y2);
+  }
+  similarity /= len;
+  return similarity;
+}
+
 
 
 }  // namespace kaldi

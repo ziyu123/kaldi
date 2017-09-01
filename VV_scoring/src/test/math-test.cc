@@ -25,13 +25,16 @@
 int main() {
   using namespace kaldi;
 
-  std::vector<double> v1{1,2,3,4,5,11};
-  std::vector<double> v2{1,2,3,4,15,0};
-  std::vector<double> v3{11,2,3,4,5,8};
+  std::vector<double> v1{1,2,3,5,6};
+  std::vector<double> v2{1,2,3,6,5};
+  std::vector<double> v3{11,2,3,5,3};
 
 
-  std::cout << CorrelationOfTwoVectors(v1, v2) << "\n";
-  std::cout << CorrelationOfTwoVectors(v1, v3) << "\n";
+  std::cout << "corr coeff is " << CorrelationOfTwoVectors(v1, v2) << "\n";
+  std::cout << "corr coeff is " << CorrelationOfTwoVectors(v1, v3) << "\n";
+
+  std::cout << "similar is " << SimilarityOfTwoVectors(v1, v2) << "\n";
+  std::cout << "similar is " << SimilarityOfTwoVectors(v1, v3) << "\n";
  
   return 0; 
 }

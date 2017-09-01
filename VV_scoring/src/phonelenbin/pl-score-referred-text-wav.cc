@@ -28,7 +28,7 @@
 #include "vvutil/common-utils.h"
 
 /// Score candidate wav with referred text and wav 
-/// based on correlation coefficient of phones' pronunciation lengths.
+/// based on phones' pronunciation lengths.
 int main(int argc, char *argv[]) {
   using namespace kaldi;
   typedef kaldi::int32 int32;
@@ -150,11 +150,19 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     if (phone_len_ref.size() == phone_len.size()) {
+        // correlation coefficient
         double corr = CorrelationOfTwoVectors(phone_len_ref, phone_len);  // between -1 and 1
-        double score = (corr - (-1)) / 2 * 100;  // between 0 and 100
+        double score_c = (corr - (-1)) / 2 * 100;  // between 0 and 100
         KALDI_LOG << "The score based on correlation coefficient of "
                   << "phones' pronunciation length is "
-                  << score;
+                  << score_c;
+
+        // similarity
+        double similar = SimilarityOfTwoVectors(phone_len_ref, phone_len);  // between 0 and 1
+        double score_s = similar * 100;  // between 0 and 100
+        KALDI_LOG << "The score based on similarity of "
+                  << "phones' pronunciation length is "
+                  << score_s;
     }
     else {
         KALDI_LOG << "The 2 wavs have different numbers of phones.";

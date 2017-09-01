@@ -25,8 +25,13 @@
 
 namespace kaldi {
 
+
 /// Compute the correlation coefficient of two vectors.
 double CorrelationOfTwoVectors(std::vector<double> x, std::vector<double> y);
+
+/// Compute the similarity of two vectors in a simple way by 
+/// comparing element-wise 2xy and x^2+y^2.
+double SimilarityOfTwoVectors(std::vector<double> x, std::vector<double> y);
 
 
 }  // namespace kaldi
