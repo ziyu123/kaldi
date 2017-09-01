@@ -34,7 +34,8 @@
 #include "nnet3/nnet-utils.h"
 #include "lat/kaldi-lattice.h"
 
-/// Score a candidate wav with referred text.
+/// Score a candidate wav with referred text 
+/// based on average (log)likelihood.
 int main(int argc, char *argv[]) {
   try {
     using namespace kaldi;
@@ -45,6 +46,7 @@ int main(int argc, char *argv[]) {
     using fst::StdArc;
 
     const char *usage =
+        "Usage like nnet3-align-compiled:\n"
         "Align features given nnet3 neural net model\n"
         "Usage:   nnet3-align-compiled [options] <nnet-in> <graphs-rspecifier> "
         "<features-rspecifier> <alignments-wspecifier>\n"

@@ -8,4 +8,5 @@ export LC_ALL=C
 # add path of VV_scoring bins
 export PATH=\
 $PWD/../src/likelihoodbin:\
+$PWD/../src/phonelenbin:\
 $PATH
