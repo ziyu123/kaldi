@@ -28,7 +28,7 @@
 #include "vvutil/common-utils.h"
 
 /// Score candidate wav with referred text and wav 
-/// based on phones' pronunciation lengths.
+/// based on correlation coefficient of phones' pronunciation lengths.
 int main(int argc, char *argv[]) {
   using namespace kaldi;
   typedef kaldi::int32 int32;
