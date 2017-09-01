@@ -34,6 +34,7 @@
 #include "nnet3/nnet-utils.h"
 #include "lat/kaldi-lattice.h"
 
+/// Score a candidate wav with referred text.
 int main(int argc, char *argv[]) {
   try {
     using namespace kaldi;
@@ -61,7 +62,9 @@ int main(int argc, char *argv[]) {
     BaseFloat self_loop_scale = 1.0;
     std::string per_frame_acwt_wspecifier;
 
-    BaseFloat avg_like_ref = 6.0;  // provided for reference
+    BaseFloat avg_like_ref = 6.0;  /// A good average (log)likelihood should 
+                                   /// be computed with well spoken wavs such as 
+                                   /// in ASR training set, for referrence. 
 
     std::string ivector_rspecifier,
         online_ivector_rspecifier,

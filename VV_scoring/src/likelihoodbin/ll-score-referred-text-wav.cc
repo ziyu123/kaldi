@@ -34,6 +34,7 @@
 #include "nnet3/nnet-utils.h"
 #include "lat/kaldi-lattice.h"
 
+/// Score a candidate wav with referred text and wav.
 int main(int argc, char *argv[]) {
   try {
     using namespace kaldi;
