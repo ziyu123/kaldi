@@ -10,4 +10,5 @@ export LC_ALL=C
 export PATH=\
 $PWD/../src/likelihoodbin:\
 $PWD/../src/phonelenbin:\
+$PWD/../src/pitchbin:\
 $PATH

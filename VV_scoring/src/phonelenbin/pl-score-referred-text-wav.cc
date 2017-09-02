@@ -3,6 +3,7 @@
 
 // Copyright 2009-2011  Microsoft Corporation
 //           2015       IMSL, PKU-HKUST (author: Wei Shi)
+//           2017       Tsinghua University (author: Zhiyuan Tang)
 
 // See ../../COPYING for clarification regarding multiple authors
 //
