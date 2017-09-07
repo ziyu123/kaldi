@@ -1,16 +1,19 @@
 
+
 all:
-EXTRA_CXXFLAGS = -Wno-sign-compare
+
+
 include ../../../src/kaldi.mk
 
 CXXFLAGS += -I../../../src
 
-BINFILES = score-loglikelihood score-pitch math-test
+TESTFILES =
 
+OBJFILES = simple-score.o
 
-OBJFILES =
+LIBNAME = kaldi-vvscore
 
-ADDLIBS = ../vvscore/kaldi-vvscore.a ../vvutil/kaldi-vvutil.a \
+ADDLIBS = ../vvutil/kaldi-vvutil.a \
 		  ../../../src/nnet3/kaldi-nnet3.a ../../../src/chain/kaldi-chain.a \
           ../../../src/cudamatrix/kaldi-cudamatrix.a ../../../src/decoder/kaldi-decoder.a \
           ../../../src/lat/kaldi-lat.a ../../../src/lm/kaldi-lm.a \
@@ -20,7 +23,5 @@ ADDLIBS = ../vvscore/kaldi-vvscore.a ../vvutil/kaldi-vvutil.a \
           ../../../src/tree/kaldi-tree.a ../../../src/util/kaldi-util.a \
           ../../../src/matrix/kaldi-matrix.a ../../../src/base/kaldi-base.a
 
-
-TESTFILES =
-
 include ../../../src/makefiles/default_rules.mk
+

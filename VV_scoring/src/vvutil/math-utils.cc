@@ -19,8 +19,6 @@
 
 #include "vvutil/math-utils.h"
 #include <numeric>
-#include <algorithm>
-#include <functional>
 
 namespace kaldi {
 
@@ -45,8 +43,9 @@ double CorrelationOfTwoVectors(std::vector<double> x, std::vector<double> y) {
   cov = (std::inner_product(x.begin(), x.end(), y.begin(), 0.0)) / len;
 
   // correlation coefficient
-  double corr = cov/sqrt(v_x*v_y);
-  return corr;
+  if (v_x*v_y == 0.0)
+    KALDI_ERR << "Correlation coefficient failed. All rezos.";
+  return cov/sqrt(v_x*v_y);
 }
 
 
@@ -64,11 +63,18 @@ double SimilarityOfTwoVectors(std::vector<double> x, std::vector<double> y) {
     x2 = x[i]*x[i];
     y2 = y[i]*y[i];
     xy = x[i]*y[i];
-    similarity += xy * 2 / (x2 + y2);
+    if ( x2+y2 != 0.0 )
+      similarity += xy * 2 / (x2 + y2);
   }
   similarity /= len;
   return similarity;
 }
+
+
+void ConvertTwoVectorsToSameLength(std::vector<double> *x, std::vector<double> *y) {
+  // to do
+}
+
 
 
 

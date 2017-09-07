@@ -30,8 +30,12 @@ namespace kaldi {
 double CorrelationOfTwoVectors(std::vector<double> x, std::vector<double> y);
 
 /// Compute the similarity of two vectors in a simple way by 
-/// comparing element-wise 2xy and x^2+y^2.
+/// comparing element-wise sum of 2xy and sum of x^2+y^2.
 double SimilarityOfTwoVectors(std::vector<double> x, std::vector<double> y);
+
+
+/// Convert two vectors to same length.
+void ConvertTwoVectorsToSameLength(std::vector<double> *x, std::vector<double> *y);
 
 
 }  // namespace kaldi

@@ -22,6 +22,7 @@
 #define KALDI_VVUTIL_COMMON_UTILS_H_
 
 #include "vvutil/math-utils.h"
+#include "vvutil/kaldi-utils.h"
 
 
 #endif  // KALDI_VVUTIL_COMMON_UTILS_H_
