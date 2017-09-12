@@ -1,4 +1,4 @@
-// vvutil/common-utils.h
+// vvutil/common-vvutils.h
 
 
 // Copyright 2017 Tsinghua University (author: Zhiyuan Tang)

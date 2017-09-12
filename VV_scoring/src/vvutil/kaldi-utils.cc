@@ -25,6 +25,13 @@
 namespace kaldi {
 
 
+/// Check file path is good.
+bool GoodFile(std::string file) {
+  std::ifstream is(file.c_str(), std::ifstream::in);
+  return is.good();
+}
+
+
 // refer to featbin/compute-fbank-feats.cc
 void FbankOfOneWav(const WaveData &wave_data,
                    Matrix<BaseFloat> *features,
@@ -178,9 +185,6 @@ double AverageLogLikelihoodPerFrame(std::string model_in_filename,
                                     std::string option_file /* "" */) {
   using namespace kaldi::nnet3;
   typedef kaldi::int32 int32;
-  using fst::SymbolTable;
-  using fst::VectorFst;
-  using fst::StdArc;
 
   const char *usage = "Get average loglikelihood per frame of one wav with referred text.\n";
 
@@ -293,15 +297,255 @@ double AverageLogLikelihoodPerFrame(std::string model_in_filename,
 }
 
 
+// refer to AlignUtteranceWrapper() in src/decoder/decoder-wrappers.cc
+// not write the alignment, but pass it in and out
+void AlignUtteranceWrapperOnline(
+    const AlignConfig &config,
+    const std::string &utt,
+    BaseFloat acoustic_scale,  // affects scores written to scores_writer, if
+                               // present
+    fst::VectorFst<fst::StdArc> *fst,  // non-const in case config.careful ==
+                                       // true.
+    DecodableInterface *decodable,  // not const but is really an input.
+    std::vector<int32> *alignment,
+    BaseFloatWriter *scores_writer,
+    int32 *num_done,
+    int32 *num_error,
+    int32 *num_retried,
+    double *tot_like,
+    int64 *frame_count,
+    BaseFloatVectorWriter *per_frame_acwt_writer) {
+    
+  if ((config.retry_beam != 0 && config.retry_beam <= config.beam) ||
+      config.beam <= 0.0) {
+    KALDI_ERR << "Beams do not make sense: beam " << config.beam
+              << ", retry-beam " << config.retry_beam;
+  }
+
+  if (fst->Start() == fst::kNoStateId) {
+    KALDI_WARN << "Empty decoding graph for " << utt;
+    if (num_error != NULL) (*num_error)++;
+    return;
+  }
+
+
+  fst::StdArc::Label special_symbol = 0;
+  if (config.careful)
+    ModifyGraphForCarefulAlignment(fst);
+
+  FasterDecoderOptions decode_opts;
+  decode_opts.beam = config.beam;
+
+  FasterDecoder decoder(*fst, decode_opts);
+  decoder.Decode(decodable);
+
+  bool ans = decoder.ReachedFinal();  // consider only final states.
+
+  if (!ans && config.retry_beam != 0.0) {
+    if (num_retried != NULL) (*num_retried)++;
+    KALDI_WARN << "Retrying utterance " << utt << " with beam "
+               << config.retry_beam;
+    decode_opts.beam = config.retry_beam;
+    decoder.SetOptions(decode_opts);
+    decoder.Decode(decodable);
+    ans = decoder.ReachedFinal();
+  }
+
+  if (!ans) {  // Still did not reach final state.
+    KALDI_WARN << "Did not successfully decode file " << utt << ", len = "
+               << decodable->NumFramesReady();
+    if (num_error != NULL) (*num_error)++;
+    return;
+  }
+
+  fst::VectorFst<LatticeArc> decoded;  // linear FST.
+  decoder.GetBestPath(&decoded);
+  if (decoded.NumStates() == 0) {
+    KALDI_WARN << "Error getting best path from decoder (likely a bug)";
+    if (num_error != NULL) (*num_error)++;
+    return;
+  }
+
+  std::vector<int32> words;
+  LatticeWeight weight;
+
+  GetLinearSymbolSequence(decoded, alignment, &words, &weight);
+  BaseFloat like = -(weight.Value1()+weight.Value2()) / acoustic_scale;
+
+  if (num_done != NULL) (*num_done)++;
+  if (tot_like != NULL) (*tot_like) += like;
+  if (frame_count != NULL) (*frame_count) += decodable->NumFramesReady();
+
+  if (scores_writer != NULL && scores_writer->IsOpen())
+    scores_writer->Write(utt, -(weight.Value1()+weight.Value2()));
+
+  Vector<BaseFloat> per_frame_loglikes;
+  if (per_frame_acwt_writer != NULL && per_frame_acwt_writer->IsOpen()) {
+    GetPerFrameAcousticCosts(decoded, &per_frame_loglikes);
+    per_frame_loglikes.Scale(-1 / acoustic_scale);
+    per_frame_acwt_writer->Write(utt, per_frame_loglikes);
+  }
+}
+
+
 // refer to nnet3bin/nnet3-align-compiled.cc
-void AlignFeatWithNnet3() {
-  // to do
+void AlignFeatWithNnet3(std::string model_in_filename,
+                        VectorFst<StdArc> decode_fst,
+                        Matrix<BaseFloat> features,
+                        std::vector<int32> *alignment,
+                        std::string option_file /* "" */) {
+  using namespace kaldi::nnet3;
+  typedef kaldi::int32 int32;
+
+  const char *usage = "Align feature using nnet3 with referred text.\n";
+
+  ParseOptions po(usage);
+  AlignConfig align_config;
+  align_config.beam = 10;
+  align_config.retry_beam = 40;
+  NnetSimpleComputationOptions decodable_opts;
+  std::string use_gpu = "no";
+  BaseFloat transition_scale = 1.0;
+  BaseFloat self_loop_scale = 0.1;
+  std::string per_frame_acwt_wspecifier;
+
+  std::string ivector_rspecifier,
+      online_ivector_rspecifier,
+      utt2spk_rspecifier;
+  int32 online_ivector_period = 0;
+  align_config.Register(&po);
+  decodable_opts.Register(&po);
+
+  po.Register("use-gpu", &use_gpu,
+              "yes|no|optional|wait, only has effect if compiled with CUDA");
+  po.Register("transition-scale", &transition_scale,
+              "Transition-probability scale [relative to acoustics]");
+  po.Register("self-loop-scale", &self_loop_scale,
+              "Scale of self-loop versus non-self-loop "
+              "log probs [relative to acoustics]");
+  po.Register("write-per-frame-acoustic-loglikes", &per_frame_acwt_wspecifier,
+              "Wspecifier for table of vectors containing the acoustic log-likelihoods "
+              "per frame for each utterance. E.g. ark:foo/per_frame_logprobs.1.ark");
+  po.Register("ivectors", &ivector_rspecifier, "Rspecifier for "
+              "iVectors as vectors (i.e. not estimated online); per utterance "
+              "by default, or per speaker if you provide the --utt2spk option.");
+  po.Register("online-ivectors", &online_ivector_rspecifier, "Rspecifier for "
+              "iVectors estimated online, as matrices.  If you supply this,"
+              " you must set the --online-ivector-period option.");
+  po.Register("online-ivector-period", &online_ivector_period, "Number of frames "
+              "between iVectors in matrices supplied to the --online-ivectors "
+              "option");
+  
+  po.PrintUsage();
+  if (GoodFile(option_file))
+    po.ReadConfigFile(option_file);
+
+#if HAVE_CUDA==1
+  CuDevice::Instantiate().SelectGpuId(use_gpu);
+#endif
+
+
+  {
+    TransitionModel trans_model;
+    AmNnetSimple am_nnet;
+    {
+      bool binary;
+      Input ki(model_in_filename, &binary);
+      trans_model.Read(ki.Stream(), binary);
+      am_nnet.Read(ki.Stream(), binary);
+    }
+    SetBatchnormTestMode(true, &(am_nnet.GetNnet()));
+    SetDropoutTestMode(true, &(am_nnet.GetNnet()));
+    CollapseModel(CollapseModelConfig(), &(am_nnet.GetNnet()));
+    // this compiler object allows caching of computations across
+    // different utterances.
+    CachingOptimizingCompiler compiler(am_nnet.GetNnet(),
+                                       decodable_opts.optimize_config);
+
+    RandomAccessBaseFloatMatrixReader online_ivector_reader(
+        online_ivector_rspecifier);
+    RandomAccessBaseFloatVectorReaderMapped ivector_reader(
+        ivector_rspecifier, utt2spk_rspecifier);
+
+    BaseFloatVectorWriter per_frame_acwt_writer(per_frame_acwt_wspecifier);
+
+    // only one utterance
+    if (features.NumRows() == 0) {
+      KALDI_WARN << "Zero-length utterance.";
+      exit(1);
+    }
+    
+    const Matrix<BaseFloat> *online_ivectors = NULL;
+    const Vector<BaseFloat> *ivector = NULL;
+    
+    {  // Add transition-probs to the FST.
+      std::vector<int32> disambig_syms;  // empty.
+      AddTransitionProbs(trans_model, disambig_syms,
+                         transition_scale, self_loop_scale,
+                         &decode_fst);
+    }
+    
+    DecodableAmNnetSimple nnet_decodable(
+        decodable_opts, trans_model, am_nnet,
+        features, ivector, online_ivectors,
+        online_ivector_period, &compiler);
+    
+    AlignUtteranceWrapperOnline(align_config, "",
+                          decodable_opts.acoustic_scale,
+                          &decode_fst, &nnet_decodable,
+                          alignment, NULL, NULL, NULL, NULL,
+                          NULL, NULL, &per_frame_acwt_writer);
+
+#if HAVE_CUDA==1
+    CuDevice::Instantiate().PrintProfile();
+#endif
+  }
 }
 
 
 // refer to bin/ali-to-phone.cc
-void GetPhonePronunciationLens() {
-  // to do
+void GetPhonePronunciationLens(std::string model_filename,
+                               std::vector<int32> alignment,
+                               std::vector<double> *phone_lens,
+                               std::string option_file /* "" */) {
+    const char *usage = "Get phone pronunciation length from alignment.\n";
+    ParseOptions po(usage);
+    bool per_frame = false;
+    bool write_lengths = true;
+    bool ctm_output = false;
+    BaseFloat frame_shift = 0.01;
+    po.Register("ctm-output", &ctm_output,
+                "If true, output the alignments in ctm format "
+                "(the confidences will be set to 1)");
+    po.Register("frame-shift", &frame_shift,
+                "frame shift used to control the times of the ctm output");
+    po.Register("per-frame", &per_frame,
+                "If true, write out the frame-level phone alignment "
+                "(else phone sequence)");
+    po.Register("write-lengths", &write_lengths,
+                "If true, write the #frames for each phone (different format)");
+    
+    po.PrintUsage();
+    if (GoodFile(option_file))
+      po.ReadConfigFile(option_file);
+                
+
+    KALDI_ASSERT(!(per_frame && write_lengths) && "Incompatible options.");
+
+    TransitionModel trans_model;
+    ReadKaldiObject(model_filename, &trans_model);
+
+    std::vector<std::vector<int32> > split;
+    SplitToPhones(trans_model, alignment, &split);
+
+    {
+      for (size_t i = 0; i < split.size(); i++) {
+        KALDI_ASSERT(split[i].size() > 0);
+        int32 num_repeats = split[i].size();
+        //KALDI_ASSERT(num_repeats!=0);
+        phone_lens->push_back(num_repeats);
+      }
+    }
 }                                    
 
 

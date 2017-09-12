@@ -28,9 +28,11 @@
 // major sub-pages.
 
 /**
-  \mainpage    VV Evaluation (VV-Eva)
-  
-  Documents for VV spoken language evaluation system.
+  \mainpage    VVave (VV EVAluation)
+
+  VVave is a series of subsystems for spoken language evaluation, which contains 
+  automatic scoring system (Parrot), 
+  ...
 
   <p>
    - \subpage about

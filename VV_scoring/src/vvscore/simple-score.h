@@ -20,7 +20,7 @@
 #ifndef KALDI_VVSCORE_SIMPLE_SCORE_H_
 #define KALDI_VVSCORE_SIMPLE_SCORE_H_
 
-#include "vvutil/common-utils.h"
+#include "vvutil/common-vvutils.h"
 
 
 namespace kaldi {
@@ -52,6 +52,32 @@ double CorrelationScoreOnKaldiPitch(std::string wav_rspecifier,
 /// Similarity score based on the kaldi pitch vectors of two wavs.
 double SimilarScoreOnKaldiPitch(std::string wav_rspecifier,
                                 std::string option_file = ""); 
+
+
+/// Correlation coeffient score based on phone pronunciation lengths of two wavs 
+/// with referred text.
+double CorrelationScoreOnPhoneLens(std::string wav_rspecifier,
+                                   std::string tree_rxfilename,
+                                   std::string model_rxfilename,
+                                   std::string lex_rxfilename,
+                                   std::string transcript_rspecifier,
+                                   std::string fbank_option_file = "",
+                                   std::string graph_option_file = "",
+                                   std::string align_option_file = "",
+                                   std::string phone_option_file = ""); 
+
+
+/// Similarity score based on phone pronunciation lengths of two wavs 
+/// with referred text.
+double SimilarScoreOnPhoneLens(std::string wav_rspecifier,
+                                   std::string tree_rxfilename,
+                                   std::string model_rxfilename,
+                                   std::string lex_rxfilename,
+                                   std::string transcript_rspecifier,
+                                   std::string fbank_option_file = "",
+                                   std::string graph_option_file = "",
+                                   std::string align_option_file = "",
+                                   std::string phone_option_file = ""); 
 
 
 

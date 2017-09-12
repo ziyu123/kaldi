@@ -5,7 +5,7 @@ include ../../../src/kaldi.mk
 
 CXXFLAGS += -I../../../src
 
-BINFILES = score-loglikelihood score-pitch math-test
+BINFILES = score-phone-lens score-loglikelihood score-pitch math-test
 
 
 OBJFILES =

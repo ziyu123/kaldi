@@ -34,7 +34,7 @@ double CorrelationOfTwoVectors(std::vector<double> x, std::vector<double> y);
 double SimilarityOfTwoVectors(std::vector<double> x, std::vector<double> y);
 
 
-/// Convert two vectors to same length.
+/// Convert two vectors to same length as the shorter one.
 void ConvertTwoVectorsToSameLength(std::vector<double> *x, std::vector<double> *y);
 
 

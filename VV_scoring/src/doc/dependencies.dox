@@ -1,4 +1,4 @@
-// doc/mainpage.dox
+// doc/dependencies.dox
 
 // Copyright  2017  Tsinghua University (author: Zhiyuan Tang)
 
@@ -28,10 +28,10 @@
 // major sub-pages.
 
 /**
-  \page dependencies    Software required to install and run VV-eva
+  \page dependencies    Software required to install and run VVave
   
-  The system is built in Kaldi.
-  Copy VV-eva to the Kaldi directory and install.
+  The system is built on Kaldi.
+  Copy VVave directory to the Kaldi directory and install (following README).
 
 <P>
 */

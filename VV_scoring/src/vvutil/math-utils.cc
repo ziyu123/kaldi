@@ -65,6 +65,8 @@ double SimilarityOfTwoVectors(std::vector<double> x, std::vector<double> y) {
     xy = x[i]*y[i];
     if ( x2+y2 != 0.0 )
       similarity += xy * 2 / (x2 + y2);
+    else
+      similarity += 1;  // when all equal 0
   }
   similarity /= len;
   return similarity;
@@ -72,7 +74,23 @@ double SimilarityOfTwoVectors(std::vector<double> x, std::vector<double> y) {
 
 
 void ConvertTwoVectorsToSameLength(std::vector<double> *x, std::vector<double> *y) {
-  // to do
+  KALDI_ASSERT(x != NULL && y != NULL);
+  if (x->size() == y->size())
+    return;
+  
+  int32 len = (x->size() < y->size() ? x->size() : y->size());
+  std::vector<double> *&vec = (x->size() < y->size() ? y : x);  // to be converted
+  int32 len_m = vec->size();
+  int32 filt = len_m - len + 1;  // pooling size
+  int32 j = 0;
+  for(std::vector<double>::iterator i = vec->begin(); i+filt-1 != vec->end(); i++) {
+    (*vec)[j] = (std::accumulate(i, i+filt, 0.0)) / filt;  // average pooling, <numeric>
+    j++;
+  }
+
+  // remove the last (len_n-len) elements of vec
+  for(int32 k=0; k<len_m-len; k++)
+    vec->pop_back();
 }
 
 

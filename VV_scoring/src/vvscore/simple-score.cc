@@ -121,11 +121,112 @@ double SimilarScoreOnKaldiPitch(std::string wav_rspecifier,
     ConvertTwoVectorsToSameLength(&pitch_ref, &pitch);
     double similar = SimilarityOfTwoVectors(pitch_ref, pitch);  // between 0 and 1
     return similar * 100;  // between 0 and 100
+}     
 
+
+double CorrelationScoreOnPhoneLens(std::string wav_rspecifier,
+                                   std::string tree_rxfilename,
+                                   std::string model_rxfilename,
+                                   std::string lex_rxfilename,
+                                   std::string transcript_rspecifier,
+                                   std::string fbank_option_file /* "" */,
+                                   std::string graph_option_file /* "" */,
+                                   std::string align_option_file /* "" */,
+                                   std::string phone_option_file /* "" */) {
+  SequentialTableReader<WaveHolder> reader(wav_rspecifier);
+  RandomAccessInt32VectorReader transcript_reader(transcript_rspecifier);
+
+  // 2 wavs (referred wav and candidate one)
+  // follow the order of wav_rspecifier
+  std::vector<double> phone_lens_ref;
+  std::vector<double> phone_lens;
+  for (int32 i = 0; !reader.Done() && i <=1; reader.Next(), i++) {
+    std::string utt = reader.Key();
+    const WaveData &wave_data = reader.Value();
+
+    std::vector<int32> transcript = transcript_reader.Value(utt);
+
+    // get fbank feature
+    Matrix<BaseFloat> features;
+    FbankOfOneWav(wave_data, &features, fbank_option_file);
+
+    // get training graph
+    VectorFst <StdArc> decode_fst;
+    TrainingGraphOfOneUtt(tree_rxfilename, model_rxfilename, lex_rxfilename, 
+                          transcript, &decode_fst, graph_option_file);
+
+    // get alignment
+    std::vector<int32> alignment;
+    AlignFeatWithNnet3(model_rxfilename, decode_fst, features, 
+                       &alignment, align_option_file);
+    
+    // get phone pronunciation lengths
+    if (i == 0)
+      GetPhonePronunciationLens(model_rxfilename, alignment, 
+                                &phone_lens_ref, phone_option_file);
+    else
+      GetPhonePronunciationLens(model_rxfilename, alignment, 
+                                &phone_lens, phone_option_file);
+  }
+
+  KALDI_ASSERT(phone_lens_ref.size() == phone_lens.size());
+  double corr = CorrelationOfTwoVectors(phone_lens_ref, phone_lens);  // between -1 and 1
+    return (corr - (-1)) / 2 * 100;  // between 0 and 100
 
 }
 
-                                    
+
+
+double SimilarScoreOnPhoneLens(std::string wav_rspecifier,
+                                   std::string tree_rxfilename,
+                                   std::string model_rxfilename,
+                                   std::string lex_rxfilename,
+                                   std::string transcript_rspecifier,
+                                   std::string fbank_option_file /* "" */,
+                                   std::string graph_option_file /* "" */,
+                                   std::string align_option_file /* "" */,
+                                   std::string phone_option_file /* "" */) {
+  SequentialTableReader<WaveHolder> reader(wav_rspecifier);
+  RandomAccessInt32VectorReader transcript_reader(transcript_rspecifier);
+
+  // 2 wavs (referred wav and candidate one)
+  // follow the order of wav_rspecifier
+  std::vector<double> phone_lens_ref;
+  std::vector<double> phone_lens;
+  for (int32 i = 0; !reader.Done() && i <=1; reader.Next(), i++) {
+    std::string utt = reader.Key();
+    const WaveData &wave_data = reader.Value();
+
+    std::vector<int32> transcript = transcript_reader.Value(utt);
+
+    // get fbank feature
+    Matrix<BaseFloat> features;
+    FbankOfOneWav(wave_data, &features, fbank_option_file);
+
+    // get training graph
+    VectorFst <StdArc> decode_fst;
+    TrainingGraphOfOneUtt(tree_rxfilename, model_rxfilename, lex_rxfilename, 
+                          transcript, &decode_fst, graph_option_file);
+
+    // get alignment
+    std::vector<int32> alignment;
+    AlignFeatWithNnet3(model_rxfilename, decode_fst, features, 
+                       &alignment, align_option_file);
+    
+    // get phone pronunciation lengths
+    if (i == 0)
+      GetPhonePronunciationLens(model_rxfilename, alignment, 
+                                &phone_lens_ref, phone_option_file);
+    else
+      GetPhonePronunciationLens(model_rxfilename, alignment, 
+                                &phone_lens, phone_option_file);
+  }
+
+  KALDI_ASSERT(phone_lens_ref.size() == phone_lens.size());
+  double similar = SimilarityOfTwoVectors(phone_lens_ref, phone_lens);  // between 0 and 1
+  return similar * 100;  // between 0 and 100
+
+}   
 
 
 

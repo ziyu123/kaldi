@@ -37,15 +37,19 @@
 #include "nnet3/nnet-utils.h"
 #include "lat/kaldi-lattice.h"
 #include "feat/pitch-functions.h"
+#include "decoder/faster-decoder.h"
+#include "lat/lattice-functions.h"
 
 namespace kaldi {
 
 
+using fst::SymbolTable;
+using fst::VectorFst;
+using fst::StdArc;
+
+
 /// Check file path is good.
-bool GoodFile(std::string file) {
-  std::ifstream is(file.c_str(), std::ifstream::in);
-  return is.good();
-}
+bool GoodFile(std::string file);
 
 
 /// Get Mel-filter bank (FBANK) feature of one wav.
@@ -55,9 +59,6 @@ void FbankOfOneWav(const WaveData &wave_data,
 
 
 /// Get training graph of one utterance.
-using fst::SymbolTable;
-using fst::VectorFst;
-using fst::StdArc;
 void TrainingGraphOfOneUtt(std::string tree_rxfilename,
                            std::string model_rxfilename,
                            std::string lex_rxfilename,
@@ -74,11 +75,18 @@ double AverageLogLikelihoodPerFrame(std::string model_in_filename,
 
 
 /// Align feature using nnet3 with referred text.
-void AlignFeatWithNnet3();
+void AlignFeatWithNnet3(std::string model_in_filename,
+                        VectorFst<StdArc> decode_fst,
+                        Matrix<BaseFloat> features,
+                        std::vector<int32> *alignment,
+                        std::string option_file = "");
 
 
 /// Get phone pronunciation length from alignment.
-void GetPhonePronunciationLens();
+void GetPhonePronunciationLens(std::string model_filename,
+                               std::vector<int32> alignment,
+                               std::vector<double> *phone_lens,
+                               std::string option_file = "");
 
 
 /// Get raw log kaldi pitch (Hz) or normalized one (default) of one wav.

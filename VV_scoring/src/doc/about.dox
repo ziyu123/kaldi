@@ -1,4 +1,4 @@
-// doc/mainpage.dox
+// doc/about.dox
 
 // Copyright  2017  Tsinghua University (author: Zhiyuan Tang)
 
@@ -28,9 +28,9 @@
 // major sub-pages.
 
 /**
-  \page about    About VV-eva system
+  \page about    About VVave system
   
-  VV-eva is built by Tsinghua University (author: Zhiyuan Tang).
+  VVave is built by CSLT, Tsinghua University (author: Zhiyuan Tang, ...).
   
   
 
