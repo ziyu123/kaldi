@@ -1,4 +1,4 @@
-// doc/dependencies.dox
+// doc/parrot.dox
 
 // Copyright  2017  Tsinghua University (author: Zhiyuan Tang)
 
@@ -28,10 +28,21 @@
 // major sub-pages.
 
 /**
-  \page dependencies    Software required to install and run Wave
+  \page parrot    About Parrot
   
-  The system is built on Kaldi.
-  Copy Wave directory to the Kaldi directory and install (following README).
+  Parrot scores spoken language automatically. 
+  Whether referred text/wav are provided or not, the method for scoring is different.
+
+  Scoring can be based on simple indicators, such as: 
+  the average log likelihood per frame during decoding with referred text (referred wav is optional),
+  the relations between pitches of two wavs (the referred and candidate ones),
+  the relations between phone pronunciation lengths of two utterances with referred text and wav.
+
+  Complex indicators such as ...
+
+  
+  
+  
 
 <P>
 */

@@ -28,15 +28,16 @@
 // major sub-pages.
 
 /**
-  \mainpage    VVave (VV EVAluation)
+  \mainpage    Wave (VV EVAluation)
 
-  VVave is a series of subsystems for spoken language evaluation, which contains 
-  automatic scoring system (Parrot), 
+  Wave or VVave is a series of subsystems for spoken language evaluation, which contains 
+  automatic scoring (Parrot), emotion recognition (Emoji), ...
   ...
 
   <p>
    - \subpage about
    - \subpage dependencies
+   - \subpage parrot
 
 <P>
 */

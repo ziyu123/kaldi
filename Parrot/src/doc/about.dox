@@ -28,9 +28,11 @@
 // major sub-pages.
 
 /**
-  \page about    About VVave system
+  \page about    About Wave and its children
   
-  VVave is built by CSLT, Tsinghua University (author: Zhiyuan Tang, ...).
+  Wave is built by CSLT, Tsinghua University (author: Zhiyuan Tang, Dong Wang ...).
+  
+  Parrot is the first child of Wave, who scores spoken language automatically.
   
   
 
