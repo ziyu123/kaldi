@@ -168,7 +168,8 @@ double CorrelationScoreOnPhoneLens(std::string wav_rspecifier,
       GetPhonePronunciationLens(model_rxfilename, alignment, 
                                 &phone_lens, phone_option_file);
   }
-
+  
+  ConvertTwoVectorsToSameLength(&phone_lens_ref, &phone_lens);  // todo, same text, not same len
   KALDI_ASSERT(phone_lens_ref.size() == phone_lens.size());
   double corr = CorrelationOfTwoVectors(phone_lens_ref, phone_lens);  // between -1 and 1
     return (corr - (-1)) / 2 * 100;  // between 0 and 100
@@ -221,7 +222,8 @@ double SimilarScoreOnPhoneLens(std::string wav_rspecifier,
       GetPhonePronunciationLens(model_rxfilename, alignment, 
                                 &phone_lens, phone_option_file);
   }
-
+  
+  ConvertTwoVectorsToSameLength(&phone_lens_ref, &phone_lens);  // todo, same text, not same len
   KALDI_ASSERT(phone_lens_ref.size() == phone_lens.size());
   double similar = SimilarityOfTwoVectors(phone_lens_ref, phone_lens);  // between 0 and 1
   return similar * 100;  // between 0 and 100
