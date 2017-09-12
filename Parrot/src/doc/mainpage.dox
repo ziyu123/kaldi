@@ -30,7 +30,7 @@
 /**
   \mainpage    Wave (VV EVAluation)
 
-  Wave or VVave is a series of subsystems for spoken language evaluation, which contains 
+  Wave or VVave is a family of subsystems for spoken language evaluation, which contains 
   automatic scoring (Parrot), emotion recognition (Emoji), ...
   ...
 

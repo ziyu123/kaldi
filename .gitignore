@@ -6,15 +6,15 @@
 !/src/*/Makefile
 !/src/*/README
 
-# Ignore files in VV_scoring
-/VV_scoring/src/*/*
-!/VV_scoring/src/*/*.*
-!/VV_scoring/src/doc/*
-!/VV_scoring/src/*/Makefile
-!/VV_scoring/src/*/README
+# Ignore files in Parrot
+/Parrot/src/*/*
+!/Parrot/src/*/*.*
+!/Parrot/src/doc/*
+!/Parrot/src/*/Makefile
+!/Parrot/src/*/README
 
-/VV_scoring/Parrot/data/*
-/VV_scoring/Parrot/model/*
+/Parrot/egs/data/*
+/Parrot/egs/model/*
 
 
 # Compiled Object files and python ciles

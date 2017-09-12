@@ -1,0 +1,15 @@
+#!/bin/bash
+
+for dir in vvutil vvscore test; do
+
+  if [[ $1 == depend ]]; then
+        make -C $dir depend -j 6
+  elif [[ $1 == clean ]]; then
+        make -C $dir clean
+  else
+        make -C $dir -j 6
+  fi
+
+done
+
+
