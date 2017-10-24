@@ -147,6 +147,8 @@ class NnetTrainer {
 
   // train on one minibatch.
   void Train(const NnetExample &eg);
+  // train on one minibatch, part of the loss is the intra distance.
+  void TrainIntra(const NnetExample &eg, BaseFloat intra_ratio);
 
   // Prints out the final stats, and return true if there was a nonzero count.
   bool PrintTotalStats() const;
@@ -159,6 +161,9 @@ class NnetTrainer {
  private:
   void ProcessOutputs(const NnetExample &eg,
                       NnetComputer *computer);
+  void ProcessOutputsIntra(const NnetExample &eg,
+                      NnetComputer *computer,
+                      BaseFloat intra_ratio);
 
   // Applies per-component max-change and global max-change to all updatable
   // components in *delta_nnet_, and use *delta_nnet_ to update parameters
@@ -227,6 +232,14 @@ void ComputeObjectiveFunction(const GeneralMatrix &supervision,
                               NnetComputer *computer,
                               BaseFloat *tot_weight,
                               BaseFloat *tot_objf);
+void ComputeObjectiveFunctionIntra(const GeneralMatrix &supervision,
+                              const std::string &output_name,
+                              bool supply_deriv,
+                              NnetComputer *computer,
+                              BaseFloat *tot_weight,
+                              BaseFloat *tot_objf,
+                              BaseFloat intra_ratio);
+
 
 
 

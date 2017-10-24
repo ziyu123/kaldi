@@ -76,6 +76,27 @@ void NnetTrainer::Train(const NnetExample &eg) {
   UpdateParamsWithMaxChange();
 }
 
+
+void NnetTrainer::TrainIntra(const NnetExample &eg, BaseFloat intra_ratio) {
+  bool need_model_derivative = true;
+  ComputationRequest request;
+  GetComputationRequest(*nnet_, eg, need_model_derivative,
+                        config_.store_component_stats,
+                        &request);
+  const NnetComputation *computation = compiler_.Compile(request);
+
+  NnetComputer computer(config_.compute_config, *computation,
+                        *nnet_, delta_nnet_);
+  // give the inputs to the computer object.
+  computer.AcceptInputs(*nnet_, eg.io);
+  computer.Forward();
+
+  this->ProcessOutputsIntra(eg, &computer, intra_ratio);
+  computer.Backward();
+
+  UpdateParamsWithMaxChange();
+}
+
 void NnetTrainer::ProcessOutputs(const NnetExample &eg,
                                  NnetComputer *computer) {
   std::vector<NnetIo>::const_iterator iter = eg.io.begin(),
@@ -96,6 +117,44 @@ void NnetTrainer::ProcessOutputs(const NnetExample &eg,
                                       tot_weight, tot_objf);
     }
   }
+}
+                                 
+
+void NnetTrainer::ProcessOutputsIntra(const NnetExample &eg,
+                                 NnetComputer *computer,
+                                 BaseFloat intra_ratio) {
+  std::vector<NnetIo>::const_iterator iter = eg.io.begin(),
+      end = eg.io.end();
+  // used for 'output_plus' which has no supervision in the egs.
+  GeneralMatrix mask;
+  for (; iter != end; ++iter) {
+    const NnetIo &io = *iter;
+    int32 node_index = nnet_->GetNodeIndex(io.name);
+    KALDI_ASSERT(node_index >= 0);
+    // consider "output" first
+    if (nnet_->IsOutputNode(node_index) && io.name == "output") {
+      ObjectiveType obj_type = nnet_->GetNode(node_index).u.objective_type;
+      BaseFloat tot_weight, tot_objf;
+      bool supply_deriv = true;
+      mask = io.features;
+      ComputeObjectiveFunction(io.features, obj_type, io.name,
+                               supply_deriv, computer,
+                               &tot_weight, &tot_objf);
+      objf_info_[io.name].UpdateStats(io.name, config_.print_interval,
+                                      num_minibatches_processed_++,
+                                      tot_weight, tot_objf);
+    }
+  }
+  // loss for the intra distance 'output_plus', with no supervision in egs, using mask above
+  BaseFloat tot_weight, tot_objf;
+  bool supply_deriv = true;
+  ComputeObjectiveFunctionIntra(mask, "output_plus",
+                                supply_deriv, computer,
+                                &tot_weight, &tot_objf, intra_ratio);
+  objf_info_["output_plus"].UpdateStats("output_plus", config_.print_interval,
+                                  num_minibatches_processed_++,
+                                  tot_weight, tot_objf);
+  
 }
 
 void NnetTrainer::UpdateParamsWithMaxChange() {
@@ -370,6 +429,67 @@ void ComputeObjectiveFunction(const GeneralMatrix &supervision,
                 << " not handled.";
   }
 }
+    
+void ComputeObjectiveFunctionIntra(const GeneralMatrix &supervision,
+                              const std::string &output_name,
+                              bool supply_deriv,
+                              NnetComputer *computer,
+                              BaseFloat *tot_weight,
+                              BaseFloat *tot_objf,
+                              BaseFloat intra_ratio) {
+  const CuMatrixBase<BaseFloat> &output = computer->GetOutput(output_name);
+
+  if (output.NumCols() != supervision.NumCols())
+    KALDI_ERR << "Nnet versus example output dimension (num-classes) "
+              << "mismatch for '" << output_name << "': " << output.NumCols()
+              << " (nnet) vs. " << supervision.NumCols() << " (egs)\n";
+
+
+  // objective is (-1)* intra_ratio * x * y.
+  switch (supervision.Type()) {
+    case kSparseMatrix: {
+      const SparseMatrix<BaseFloat> &post = supervision.GetSparseMatrix();
+      CuSparseMatrix<BaseFloat> cu_post(post);
+      // The cross-entropy objective is computed by a simple dot product,
+      // because after the LogSoftmaxLayer, the output is already in the form
+      // of log-likelihoods that are normalized to sum to one.
+      *tot_weight = cu_post.Sum() * (-1) * intra_ratio;
+      *tot_objf = TraceMatSmat(output, cu_post, kTrans) * (-1) * intra_ratio;
+      if (supply_deriv) {
+        CuMatrix<BaseFloat> output_deriv(output.NumRows(), output.NumCols(),
+                                         kUndefined);
+        cu_post.CopyToMat(&output_deriv);
+        output_deriv.Scale((-1) * intra_ratio);
+        computer->AcceptOutputDeriv(output_name, &output_deriv);
+      }
+      break;
+    }
+    case kFullMatrix: {
+      // there is a redundant matrix copy in here if we're not using a GPU
+      // but we don't anticipate this code branch being used in many cases.
+      CuMatrix<BaseFloat> cu_post(supervision.GetFullMatrix());
+      *tot_weight = cu_post.Sum() * (-1) * intra_ratio;
+      *tot_objf = TraceMatMat(output, cu_post, kTrans) * (-1) * intra_ratio;
+      if (supply_deriv)
+        cu_post.Scale((-1) * intra_ratio);
+        computer->AcceptOutputDeriv(output_name, &cu_post);
+      break;
+    }
+    case kCompressedMatrix: {
+      Matrix<BaseFloat> post;
+      supervision.GetMatrix(&post);
+      CuMatrix<BaseFloat> cu_post;
+      cu_post.Swap(&post);
+      *tot_weight = cu_post.Sum() * (-1) * intra_ratio;
+      *tot_objf = TraceMatMat(output, cu_post, kTrans) * (-1) * intra_ratio;
+      if (supply_deriv)
+        cu_post.Scale((-1) * intra_ratio);
+        computer->AcceptOutputDeriv(output_name, &cu_post);
+      break;
+    }
+  }
+}
+
 
 
 
